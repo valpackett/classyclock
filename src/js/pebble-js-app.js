@@ -56,9 +56,10 @@ Pebble.addEventListener("appmessage", function(e) {
 });
 
 Pebble.addEventListener("showConfiguration", function(e) {
-  Pebble.openURL("http://myfreeweb.github.io/classyclock/");
+  Pebble.openURL("http://myfreeweb.github.io/classyclock/#" + encodeURIComponent(JSON.stringify(localStorage.getItem(SCHED_KEY))));
 });
 
 Pebble.addEventListener("webviewclosed", function(e) {
   localStorage.setItem(SCHED_KEY, JSON.parse(decodeURIComponent(e.response)));
+  sendNextEvent();
 });
