@@ -1,0 +1,38 @@
+{
+  "uuid": "40aea840-06c6-45be-ada0-37dd5442c853",
+  "shortName": "Classy Clock",
+  "longName": "Classy Clock",
+  "companyName": "{ float: both }",
+  "versionCode": 1,
+  "versionLabel": "0.1.0",
+  "watchapp": {
+    "watchface": true
+  },
+  "appKeys": {
+    "nothing": 0,
+    "time": 1,
+    "subj": 2,
+    "end": 3,
+    "get": 4
+  },
+  "resources": {
+    "media": [
+      {
+        "characterRegex": "[:0-9]",
+        "type": "font",
+        "name": "FONT_SIGNIKA_SUBSET_40",
+        "file": "fonts/Signika-Regular.ttf"
+      },
+      {
+        "type": "font",
+        "name": "FONT_SIGNIKA_21",
+        "file": "fonts/Signika-Regular.ttf"
+      },
+      {
+        "type": "font",
+        "name": "FONT_SIGNIKA_18",
+        "file": "fonts/Signika-Regular.ttf"
+      }
+    ]
+  }
+}
