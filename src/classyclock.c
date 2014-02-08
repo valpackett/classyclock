@@ -75,7 +75,13 @@ static void send_message_get() {
 
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
   static char time_text[] = "00:00";
-  strftime(time_text, sizeof(time_text), "%R", tick_time);
+  static char *time_format;
+  if (clock_is_24h_style()) {
+    time_format = "%R";
+  } else {
+    time_format = "%I:%M";
+  }
+  strftime(time_text, sizeof(time_text), time_format, tick_time);
   text_layer_set_text(tl_current_time, time_text);
 
   static char date_text[] = "Xxxxxxxxx 00";
