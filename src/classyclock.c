@@ -8,7 +8,7 @@ static TextLayer *tl_next_class_time;
 static char next_class_subject[32];
 static char next_class_time[32];
 static uint8_t current_minutes;
-static int8_t next_class_minutes_left;
+static int8_t next_class_minutes_left = 0;
 static char *next_class_verb;
 
 enum {
@@ -64,7 +64,7 @@ static void update_next_class_time() {
   text_layer_set_text(tl_next_class_time, next_class_time);
 }
 
-static void send_message_get(void) {
+static void send_message_get() {
   Tuplet get_tuple = TupletInteger(MSG_KEY_GET, 1);
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
@@ -94,7 +94,7 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 static void handle_message_receive(DictionaryIterator *iter, void *context) {
   Tuple *nothing_tuple = dict_find(iter, MSG_KEY_NOTHING);
   if (nothing_tuple) {
-    text_layer_set_text(tl_next_class_subject, "No more classes today.");
+    text_layer_set_text(tl_next_class_subject, "No more classes.");
     text_layer_set_text(tl_next_class_time, "See you tomorrow.");
   } else {
     Tuple *subj_tuple = dict_find(iter, MSG_KEY_SUBJ);
@@ -112,6 +112,11 @@ static void handle_message_receive(DictionaryIterator *iter, void *context) {
   }
 }
 
+static void handle_message_send_failed(DictionaryIterator *failed, AppMessageResult reason, void *context) {
+  text_layer_set_text(tl_next_class_subject, "Please");
+  text_layer_set_text(tl_next_class_time, "wait");
+}
+
 static void handle_init(void) {
   window = window_create();
   window_set_background_color(window, GColorBlack);
@@ -121,7 +126,8 @@ static void handle_init(void) {
   });
   tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
   app_message_register_inbox_received(handle_message_receive);
-  app_message_open(/* inbound_size: */ 64, /* outbound_size: */ 64);
+  app_message_register_outbox_failed(handle_message_send_failed);
+  app_message_open(/* inbound_size: */ 128, /* outbound_size: */ 128);
   window_stack_push(window, /* animated: */ true);
 }
 
