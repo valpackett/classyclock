@@ -1,10 +1,14 @@
-var schedule = [
-  {
-    "start": [20, 10],
-    "end": [20, 30],
-    "subj": "Rocket Science"
-  }
-];
+var SCHED_KEY = "schedule";
+
+if (!localStorage.getItem(SCHED_KEY)) {
+  localStorage.setItem(SCHED_KEY, [
+    {
+      "start": [23, 58],
+      "end": [23, 59],
+      "subj": "Edit schedule on phone"
+    }
+  ]);
+}
 
 function flattenTime(time) {
   return time[0] * 60 + time[1];
@@ -39,13 +43,22 @@ function getNextEvent(flat_schedule) {
   return result;
 }
 
-Pebble.addEventListener("ready", function(e) {
-  Pebble.sendAppMessage(getNextEvent(flattenSchedule(schedule)));
-});
+function sendNextEvent() {
+  Pebble.sendAppMessage(getNextEvent(flattenSchedule(localStorage.getItem(SCHED_KEY))));
+}
+
+Pebble.addEventListener("ready", sendNextEvent);
 
 Pebble.addEventListener("appmessage", function(e) {
   if (e.payload.get) {
-    Pebble.sendAppMessage(getNextEvent(flattenSchedule(schedule)));
+    sendNextEvent();
   }
 });
 
+Pebble.addEventListener("showConfiguration", function(e) {
+  Pebble.openURL("http://myfreeweb.github.io/classyclock/");
+});
+
+Pebble.addEventListener("webviewclosed", function(e) {
+  localStorage.setItem(SCHED_KEY, JSON.parse(decodeURIComponent(e.response)));
+});
