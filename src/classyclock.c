@@ -7,9 +7,10 @@ static TextLayer *tl_next_class_subject;
 static TextLayer *tl_next_class_time;
 static char next_class_subject[32];
 static char next_class_time[32];
-static uint16_t current_minutes;
-static int16_t next_class_minutes_left = 2;
 static char *next_class_verb = "xxxxxx";
+static uint16_t next_class_minutes;
+static uint8_t do_retry = 0;
+static uint8_t is_nothing = 0;
 
 enum {
   MSG_KEY_NOTHING = 0x0,
@@ -59,18 +60,26 @@ static void handle_window_unload(Window *window) {
   text_layer_destroy(tl_next_class_time);
 }
 
-static void update_next_class_time() {
-  text_layer_set_text(tl_next_class_subject, next_class_subject);
-  snprintf(next_class_time, 32, "%s in %d min.", next_class_verb, next_class_minutes_left);
-  text_layer_set_text(tl_next_class_time, next_class_time);
-}
-
 static void send_message_get() {
   Tuplet get_tuple = TupletInteger(MSG_KEY_GET, 1);
   DictionaryIterator *iter;
   if (app_message_outbox_begin(&iter) != APP_MSG_OK) return;
   if (dict_write_tuplet(iter, &get_tuple) != DICT_OK) return;
   app_message_outbox_send();
+}
+
+static void update_next_class_time(struct tm *tick_time) {
+  uint16_t current_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
+  int16_t next_class_minutes_left = next_class_minutes - current_minutes;
+  if (is_nothing == 1) {
+    text_layer_set_text(tl_next_class_subject, "No more classes.");
+    text_layer_set_text(tl_next_class_time, "See you tomorrow.");
+  } else {
+    text_layer_set_text(tl_next_class_subject, next_class_subject);
+    snprintf(next_class_time, 32, "%s in %d min.", next_class_verb, next_class_minutes_left);
+    text_layer_set_text(tl_next_class_time, next_class_time);
+  }
+  if (next_class_minutes_left <= 0) send_message_get();
 }
 
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
@@ -88,40 +97,40 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
   strftime(date_text, sizeof(date_text), "%B %e", tick_time);
   text_layer_set_text(tl_current_date, date_text);
 
-  current_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
-  next_class_minutes_left -= 1;
-  if (next_class_minutes_left <= 0) {
-    send_message_get();
-  } else {
-    update_next_class_time();
-  }
+  if (do_retry == 1) send_message_get();
+  update_next_class_time(tick_time);
 }
 
 static void handle_message_receive(DictionaryIterator *iter, void *context) {
+  do_retry = 0;
   Tuple *nothing_tuple = dict_find(iter, MSG_KEY_NOTHING);
+  time_t now = time(NULL);
+  struct tm *current_time = localtime(&now);
   if (nothing_tuple) {
-    text_layer_set_text(tl_next_class_subject, "No more classes.");
-    text_layer_set_text(tl_next_class_time, "See you tomorrow.");
+    is_nothing = 1;
+    uint16_t current_minutes = current_time->tm_hour * 60 + current_time->tm_min;
+    next_class_minutes = current_minutes + 10;
   } else {
+    is_nothing = 0;
     Tuple *subj_tuple = dict_find(iter, MSG_KEY_SUBJ);
     Tuple *time_tuple = dict_find(iter, MSG_KEY_TIME);
     Tuple *end_tuple = dict_find(iter, MSG_KEY_END);
     strncpy(next_class_subject, subj_tuple->value->cstring, 32);
-    next_class_minutes_left = time_tuple->value->uint16 - current_minutes;
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "next_class_minutes_left: %d - %d = %d", time_tuple->value->uint16, current_minutes, next_class_minutes_left);
+    next_class_minutes = time_tuple->value->uint16;
     if (end_tuple) {
       next_class_verb = "ends";
     } else {
       next_class_verb = "begins";
     }
-    update_next_class_time();
   }
+  update_next_class_time(current_time);
 }
 
 static void handle_message_send_failed(DictionaryIterator *failed, AppMessageResult reason, void *context) {
+  do_retry = 1;
   APP_LOG(APP_LOG_LEVEL_DEBUG, "FAIL: %d", reason);
-  text_layer_set_text(tl_next_class_subject, "Please");
-  text_layer_set_text(tl_next_class_time, "wait");
+  /* text_layer_set_text(tl_next_class_subject, "Please"); */
+  /* text_layer_set_text(tl_next_class_time, "wait"); */
 }
 
 static void handle_init(void) {

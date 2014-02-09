@@ -68,11 +68,11 @@ Pebble.addEventListener("appmessage", function(e) {
 });
 
 Pebble.addEventListener("showConfiguration", function(e) {
-  Pebble.openURL("http://myfreeweb.github.io/classyclock/#" + encodeURIComponent(JSON.stringify(getSchedule())));
+  Pebble.openURL("http://myfreeweb.github.io/classyclock/#" + encodeURIComponent(JSON.stringify({"schedule": getSchedule()})));
 });
 
 Pebble.addEventListener("webviewclosed", function(e) {
   console.log("WEBVIEWCLOSED. Response: " + decodeURIComponent(e.response));
-  setSchedule(JSON.parse(decodeURIComponent(e.response)));
+  setSchedule(JSON.parse(decodeURIComponent(e.response))["schedule"]);
   sendNextEvent();
 });
