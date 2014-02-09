@@ -7,9 +7,9 @@ static TextLayer *tl_next_class_subject;
 static TextLayer *tl_next_class_time;
 static char next_class_subject[32];
 static char next_class_time[32];
-static uint8_t current_minutes;
-static int8_t next_class_minutes_left = 0;
-static char *next_class_verb;
+static uint16_t current_minutes;
+static int16_t next_class_minutes_left = 2;
+static char *next_class_verb = "xxxxxx";
 
 enum {
   MSG_KEY_NOTHING = 0x0,
@@ -60,6 +60,7 @@ static void handle_window_unload(Window *window) {
 }
 
 static void update_next_class_time() {
+  text_layer_set_text(tl_next_class_subject, next_class_subject);
   snprintf(next_class_time, 32, "%s in %d min.", next_class_verb, next_class_minutes_left);
   text_layer_set_text(tl_next_class_time, next_class_time);
 }
@@ -67,9 +68,8 @@ static void update_next_class_time() {
 static void send_message_get() {
   Tuplet get_tuple = TupletInteger(MSG_KEY_GET, 1);
   DictionaryIterator *iter;
-  app_message_outbox_begin(&iter);
-  if (iter == NULL) return;
-  dict_write_tuplet(iter, &get_tuple);
+  if (app_message_outbox_begin(&iter) != APP_MSG_OK) return;
+  if (dict_write_tuplet(iter, &get_tuple) != DICT_OK) return;
   app_message_outbox_send();
 }
 
@@ -107,8 +107,8 @@ static void handle_message_receive(DictionaryIterator *iter, void *context) {
     Tuple *time_tuple = dict_find(iter, MSG_KEY_TIME);
     Tuple *end_tuple = dict_find(iter, MSG_KEY_END);
     strncpy(next_class_subject, subj_tuple->value->cstring, 32);
-    text_layer_set_text(tl_next_class_subject, next_class_subject);
-    next_class_minutes_left = time_tuple->value->uint8 - current_minutes;
+    next_class_minutes_left = time_tuple->value->uint16 - current_minutes;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "next_class_minutes_left: %d - %d = %d", time_tuple->value->uint16, current_minutes, next_class_minutes_left);
     if (end_tuple) {
       next_class_verb = "ends";
     } else {
@@ -119,6 +119,7 @@ static void handle_message_receive(DictionaryIterator *iter, void *context) {
 }
 
 static void handle_message_send_failed(DictionaryIterator *failed, AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "FAIL: %d", reason);
   text_layer_set_text(tl_next_class_subject, "Please");
   text_layer_set_text(tl_next_class_time, "wait");
 }
@@ -130,11 +131,14 @@ static void handle_init(void) {
     .load = handle_window_load,
     .unload = handle_window_unload,
   });
-  tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
   app_message_register_inbox_received(handle_message_receive);
   app_message_register_outbox_failed(handle_message_send_failed);
   app_message_open(/* inbound_size: */ 128, /* outbound_size: */ 128);
   window_stack_push(window, /* animated: */ true);
+  time_t now = time(NULL);
+  struct tm *current_time = localtime(&now);
+  handle_minute_tick(current_time, MINUTE_UNIT);
+  tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
 }
 
 static void handle_deinit(void) {

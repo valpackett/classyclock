@@ -1,6 +1,6 @@
 function getSchedule() {
-  var ls = localStorage.getItem("x");
-  if (ls !== null) return JSON.parse(ls);
+  var ls = localStorage.getItem("y");
+  if (ls !== null) return JSON.parse(ls)["schedule"];
   return [
     {
       "start": [23, 58],
@@ -11,7 +11,7 @@ function getSchedule() {
 }
 
 function setSchedule(s) {
-  return localStorage.setItem("x", JSON.stringify(s));
+  return localStorage.setItem("y", JSON.stringify({"schedule": s}));
 }
 
 function flattenTime(time) {
@@ -43,27 +43,28 @@ function getNextEvent(flat_schedule) {
       result = entry;
     }
   });
-  console.log("Time: " + result["time"] + " End: " + result["end"]);
+  console.log("Got next event: " + JSON.stringify(result));
   return result;
 }
 
 function sendNextEvent() {
   Pebble.sendAppMessage(getNextEvent(flattenSchedule(getSchedule())),
     function(e) {
-      console.log("Successfully delivered message with transactionId="
-                  + e.data.transactionId);
+      console.log("Successfully delivered message with transactionId=" + e.data.transactionId);
     },
     function(e) {
-      console.log("Unable to deliver message with transactionId="
-                  + e.data.transactionId
-                  + " Error is: " + e.error.message);
+      console.log("Unable to deliver message with transactionId=" + e.data.transactionId + " Error is: " + e.error.message);
     });
 }
 
-Pebble.addEventListener("ready", function(e) { });
+Pebble.addEventListener("ready", function(e) {
+  console.log("READY. Event: " + e + " Sched: " + JSON.stringify(getSchedule()));
+  sendNextEvent();
+});
 
 Pebble.addEventListener("appmessage", function(e) {
-  sendNextEvent();
+  console.log("APPMESSAGE. Event: " + JSON.stringify(e));
+  if (e.payload.get) sendNextEvent();
 });
 
 Pebble.addEventListener("showConfiguration", function(e) {
@@ -71,6 +72,7 @@ Pebble.addEventListener("showConfiguration", function(e) {
 });
 
 Pebble.addEventListener("webviewclosed", function(e) {
+  console.log("WEBVIEWCLOSED. Response: " + decodeURIComponent(e.response));
   setSchedule(JSON.parse(decodeURIComponent(e.response)));
   sendNextEvent();
 });
