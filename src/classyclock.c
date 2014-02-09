@@ -79,7 +79,11 @@ static void update_next_class_time(struct tm *tick_time) {
     text_layer_set_text(tl_next_class_time, "...");
   } else {
     text_layer_set_text(tl_next_class_subject, next_class_subject);
-    snprintf(next_class_time, 32, "%s in %d min.", next_class_verb, next_class_minutes_left);
+    if (next_class_minutes_left > 60) {
+      snprintf(next_class_time, 32, "%s in %dh%dm", next_class_verb, next_class_minutes_left / 60, next_class_minutes_left % 60);
+    } else {
+      snprintf(next_class_time, 32, "%s in %d min.", next_class_verb, next_class_minutes_left);
+    }
     text_layer_set_text(tl_next_class_time, next_class_time);
   }
   if (next_class_minutes_left <= 0) send_message_get();
