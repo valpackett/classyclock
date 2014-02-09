@@ -74,6 +74,9 @@ static void update_next_class_time(struct tm *tick_time) {
   if (is_nothing == 1) {
     text_layer_set_text(tl_next_class_subject, "No more classes.");
     text_layer_set_text(tl_next_class_time, "See you tomorrow.");
+  } else if (next_class_minutes_left <= 0) {
+    text_layer_set_text(tl_next_class_subject, "Updating");
+    text_layer_set_text(tl_next_class_time, "...");
   } else {
     text_layer_set_text(tl_next_class_subject, next_class_subject);
     snprintf(next_class_time, 32, "%s in %d min.", next_class_verb, next_class_minutes_left);
@@ -129,8 +132,6 @@ static void handle_message_receive(DictionaryIterator *iter, void *context) {
 static void handle_message_send_failed(DictionaryIterator *failed, AppMessageResult reason, void *context) {
   do_retry = 1;
   APP_LOG(APP_LOG_LEVEL_DEBUG, "FAIL: %d", reason);
-  /* text_layer_set_text(tl_next_class_subject, "Please"); */
-  /* text_layer_set_text(tl_next_class_time, "wait"); */
 }
 
 static void handle_init(void) {

@@ -1,13 +1,15 @@
-function getSchedule() {
-  var ls = localStorage.getItem("y");
-  if (ls !== null) return JSON.parse(ls)["schedule"];
-  return [
+var defaultSchedule = [
     {
       "start": [23, 58],
       "end": [23, 59],
       "subj": "Edit schedule on phone"
     }
   ];
+
+function getSchedule() {
+  var ls = localStorage.getItem("y");
+  if (ls !== null) return JSON.parse(ls)["schedule"] || defaultSchedule;
+  return defaultSchedule;
 }
 
 function setSchedule(s) {
@@ -58,7 +60,7 @@ function sendNextEvent() {
 }
 
 Pebble.addEventListener("ready", function(e) {
-  console.log("READY. Event: " + e + " Sched: " + JSON.stringify(getSchedule()));
+  console.log("READY. Event: " + JSON.stringify(e) + " Sched: " + JSON.stringify(getSchedule()));
   sendNextEvent();
 });
 
