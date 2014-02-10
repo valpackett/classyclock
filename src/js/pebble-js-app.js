@@ -1,19 +1,30 @@
-var defaultSchedule = [
-    {
-      "start": [23, 58],
-      "end": [23, 59],
-      "subj": "Edit schedule on phone"
-    }
-  ];
+var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    defaultSchedules = days.map(function(d) {
+      return {
+        "day": d,
+        "schedule": [
+          {
+            "start": [23, 58],
+            "end": [23, 59],
+            "subj": "Edit schedule on phone"
+          }
+        ]
+      }
+    });
 
-function getSchedule() {
-  var ls = localStorage.getItem("y");
-  if (ls !== null) return JSON.parse(ls)["schedule"] || defaultSchedule;
-  return defaultSchedule;
+function getSchedules() {
+  var ls = localStorage.getItem("schedules");
+  if (ls !== null) return JSON.parse(ls)["schedules"] || defaultSchedules;
+  return defaultSchedules;
 }
 
-function setSchedule(s) {
-  return localStorage.setItem("y", JSON.stringify({"schedule": s}));
+function getScheduleForToday() {
+  var today = days[new Date().getDay() - 1];
+  return getSchedules().filter(function(s) { return s["day"] == today })[0]["schedule"];
+}
+
+function setSchedules(s) {
+  return localStorage.setItem("schedules", JSON.stringify({"schedules": s}));
 }
 
 function flattenTime(time) {
@@ -49,7 +60,7 @@ function getNextEvent(flat_schedule) {
 }
 
 function sendNextEvent() {
-  Pebble.sendAppMessage(getNextEvent(flattenSchedule(getSchedule())),
+  Pebble.sendAppMessage(getNextEvent(flattenSchedule(getScheduleForToday())),
     function(e) {
       console.log("Successfully delivered message with transactionId=" + e.data.transactionId);
     },
@@ -59,7 +70,7 @@ function sendNextEvent() {
 }
 
 Pebble.addEventListener("ready", function(e) {
-  console.log("READY. Event: " + JSON.stringify(e) + " Sched: " + JSON.stringify(getSchedule()));
+  console.log("READY. Event: " + JSON.stringify(e) + " Schedules: " + JSON.stringify(getSchedules()));
   sendNextEvent();
 });
 
@@ -69,13 +80,13 @@ Pebble.addEventListener("appmessage", function(e) {
 });
 
 Pebble.addEventListener("showConfiguration", function(e) {
-  Pebble.openURL("http://myfreeweb.github.io/classyclock/#" + encodeURIComponent(JSON.stringify({"schedule": getSchedule()})));
+  Pebble.openURL("http://myfreeweb.github.io/classyclock/#" + encodeURIComponent(JSON.stringify({"schedules": getSchedules()})));
 });
 
 Pebble.addEventListener("webviewclosed", function(e) {
   var rsp = JSON.parse(decodeURIComponent(e.response));
   if (typeof rsp === "object") {
-    setSchedule(rsp["schedule"]);
+    setSchedules(rsp["schedules"]);
     sendNextEvent();
   }
 });
