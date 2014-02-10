@@ -45,7 +45,6 @@ function getNextEvent(flat_schedule) {
       result = entry;
     }
   });
-  console.log("Got next event: " + JSON.stringify(result));
   return result;
 }
 
@@ -74,7 +73,9 @@ Pebble.addEventListener("showConfiguration", function(e) {
 });
 
 Pebble.addEventListener("webviewclosed", function(e) {
-  console.log("WEBVIEWCLOSED. Response: " + decodeURIComponent(e.response));
-  setSchedule(JSON.parse(decodeURIComponent(e.response))["schedule"]);
-  sendNextEvent();
+  var rsp = JSON.parse(decodeURIComponent(e.response));
+  if (typeof rsp === "object") {
+    setSchedule(rsp["schedule"]);
+    sendNextEvent();
+  }
 });
