@@ -101,7 +101,7 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
   text_layer_set_text(tl_current_time, time_text);
 
   static char date_text[] = "Xxxxxxxxx 00";
-  strftime(date_text, sizeof(date_text), "%B %e", tick_time);
+  strftime(date_text, sizeof(date_text), "%a %b %e", tick_time);
   text_layer_set_text(tl_current_date, date_text);
 
   if (do_retry == 1 || (tick_time->tm_hour == 0 && tick_time->tm_min == 0)) send_message_get();
