@@ -98,6 +98,10 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
     time_format = "%I:%M";
   }
   strftime(time_text, sizeof(time_text), time_format, tick_time);
+  if (!clock_is_24h_style() && (time_text[0] == '0')) {
+    // Remove the leading zero when 12-hour clock is used
+    memmove(time_text, &time_text[1], sizeof(time_text) - 1);
+  }
   text_layer_set_text(tl_current_time, time_text);
 
   static char date_text[] = "Xxxxxxxxx 00";
