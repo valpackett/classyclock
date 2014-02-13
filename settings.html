@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ratchet/1.0.1/ratchet.min.css">
+<style>
+  .content { padding-top: 1em; }
+  .content > a.button-block { margin: 10px; }
+  .hidden { display: none; }
+  .sched-list li {
+    overflow: hidden;
+    padding-bottom: 10px;
+    padding-right: 10px;
+  }
+  .actionbar {
+    width: 12%;
+    float: right;
+    border-left: solid 1px #eee;
+    padding-left: 2%;
+  }
+  form.input-group {
+    width: 83%;
+    float: left;
+  }
+  .actionbar a.button-block {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    position: relative;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    width: 100%;
+    top: 0;
+    right: 0;
+  }
+</style>
+
+<body id="events">
+  <header class="bar-title">
+    <a class="button" v-on="click: cancel">
+      Cancel
+    </a>
+    <h1 class="title">Classy Clock</h1>
+    <a class="button" v-on="click: save">
+      Save
+    </a>
+  </header>
+
+  <nav class="bar-standard bar-header-secondary">
+    <ul class="segmented-controller">
+      <li v-repeat="days" v-class="active: this.id == currentDay.id">
+        <a v-on="click: openDay(this)">{{shortName}}</a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="content">
+
+    <ul class="inset list sched-list" v-repeat="schedule" v-class="hidden: this.day != currentDay.name">
+      <li v-repeat="schedule">
+        <div class="actionbar">
+          <a class="button-negative button-block" v-on="click: remove" data-id="{{$index}}">x</a>
+          <a class="button-block" v-on="click: moveUp" data-id="{{$index}}">&uarr;</a>
+          <a class="button-block" v-on="click: moveDown" data-id="{{$index}}">&darr;</a>
+        </div>
+        <form class="input-group">
+          <div class="input-row">
+            <label for="subject-{{$index}}">Subject</label>
+            <input id="subject-{{$index}}" type="text" maxlength="32" required v-model="subj">
+          </div>
+          <div class="input-row">
+            <label for="start-{{$index}}">Start</label>
+            <input id="start-{{$index}}" type="time" step="60" required v-model="start">
+          </div>
+          <div class="input-row">
+            <label for="end-{{$index}}">End</label>
+            <input id="end-{{$index}}" type="time" step="60" required v-model="end">
+          </div>
+        </form>
+      </li>
+    </ul>
+
+    <a class="button-positive button-block" v-on="click: add">Add class</a>
+
+  </div>
+
+  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.8.3/vue.min.js"></script>
+  <script>
+    function splitTime(t) {
+      return t.split(":").slice(0, 2).map(function (i) { return parseInt(i); });
+    }
+    function zeroPad(t) {
+      if (t < 10) {
+        return "0" + t;
+      } else {
+        return  "" + t;
+      }
+    }
+    function mergeTime(t) {
+      return zeroPad(t[0]) + ":" + zeroPad(t[1]);
+    }
+    function arrSwap(arr, index, dir) {
+      var nxt = index + dir;
+      if (nxt < 0 || nxt > arr.length) {
+      } else {
+        var tmp = arr[index];
+        arr.replace(index, arr[nxt]);
+        arr.replace(nxt, tmp);
+      }
+    }
+    var dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        initialSchedule = (document.location.hash == "")
+          ? dayNames.map(function(d) { return {"day": d, "schedule": [{}]}; })
+          : JSON.parse(decodeURIComponent(document.location.hash.slice(1)))["schedules"].map(function (e) {
+            e["schedule"] = e["schedule"].map(function(s) {
+              s["start"] = mergeTime(s["start"]);
+              s["end"] = mergeTime(s["end"]);
+              return s;
+            });
+            return e;
+          });
+    var v = new Vue({
+      el: "#events",
+      data: {
+        schedule: initialSchedule,
+        days: dayNames.map(function(d, i) { return {"id": i, "name": d, "shortName": d[0]}; }),
+        currentDay: {"id": 0, "name": "Monday"}
+      },
+      methods: {
+        cancel: function(event) {
+          document.location = "pebblejs://close";
+        },
+        save: function(event) {
+          var fields = document.getElementsByTagName('input');
+          for (var i = 0; i < fields.length; i++) {
+            if (fields[i].checkValidity() === false) {
+              fields[i].focus();
+              alert("Invalid value: " + fields[i].value);
+              return;
+            }
+          }
+          var schedule = this.schedule.map(function(s) {
+            s["schedule"] = s["schedule"].filter(function(e) {
+              return typeof(e["subj"]) !== "undefined" && typeof(e["start"]) !== "undefined" && typeof(e["end"]) !== "undefined";
+            }).map(function(e) {
+              e["start"] = splitTime(e["start"]);
+              e["end"] = splitTime(e["end"]);
+              return e;
+            }).sort(function(a, b) {
+              return (a["start"][0] * 60 + a["start"][1]) - (b["start"][0] * 60 + b["start"][1]);
+            });
+            return s;
+          });
+          var data = JSON.stringify({"schedules": schedule});
+          console.log(data);
+          document.location = "pebblejs://close#" + encodeURIComponent(data);
+        },
+        add: function(event) {
+          this.schedule[this.currentDay.id]["schedule"].push({});
+        },
+        remove: function(event) {
+          this.schedule[this.currentDay.id]["schedule"].remove(parseInt(event.target.dataset.id));
+        },
+        moveUp: function(event) {
+          arrSwap(this.schedule[this.currentDay.id]["schedule"], parseInt(event.target.dataset.id), -1);
+        },
+        moveDown: function(event) {
+          arrSwap(this.schedule[this.currentDay.id]["schedule"], parseInt(event.target.dataset.id), 1);
+        },
+        openDay: function(day) {
+          this.currentDay.id = day.id;
+          this.currentDay.name = day.name;
+        }
+      }
+    });
+  </script>
+</body>
