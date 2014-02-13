@@ -2,7 +2,7 @@
 
 A Pebble (2.0) watchface that displays when your current class ends / your next class begins.
 
-![Screenshot](https://files.app.net/nnrzylA2.png)
+![Screenshot](https://files.app.net/nk5wM4y9.png)
 
 You can import your schedule from [My Class Schedule for Android](http://www.my-class-schedule.com/) in Settings.
 
