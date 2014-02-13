@@ -4,6 +4,8 @@
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ratchet/1.0.1/ratchet.min.css">
 <style>
   .content { padding-top: 1em; }
+  .pad-block { padding: 10px; }
+  .little-help { font-size: smaller; color: #999; margin: 1em 0; }
   .content > a.button-block { margin: 10px; }
   .hidden { display: none; }
   .sched-list li {
@@ -81,6 +83,28 @@
     </ul>
 
     <a class="button-positive button-block" v-on="click: add">Add class</a>
+    <a class="button-block" v-on="click: showJSON" v-class="hidden: isJSONVisible == true">Backup/Restore/Import</a>
+
+    <div class="pad-block" v-class="hidden: isJSONVisible == false">
+      <form action="/import/myclassschedule" method="POST" enctype="multipart/form-data">
+        <textarea rows="5" v-model="json"></textarea>
+        <a class="button" v-on="click: backup">Backup</a>
+        <a class="button" v-on="click: restore">Restore</a>
+        <p class="little-help">
+          To backup: tap Backup, copy the text, paste it somewhere (in your favorite notes app).<br>
+          To restore: copy the text of your backup, paste it above, tap Restore.
+        </p>
+        <h3>Import from My Class Schedule</h3>
+        <p class="little-help">
+          Make sure you have a file manager such as Cabinet or Sliding Explorer installed on your device.<br>
+          Go to My Class Schedule &rarr; Settings &rarr; Backup / Restore &rarr; Create new backup.<br>
+          Tap the file chooser here, select your file manager, go to your SD Card &rarr; My Class Schedule and choose the latest backup file.
+          Finally, tap Import.
+        </p>
+        <input type="file" name="database">
+        <button type="submit" class="button">Import</button>
+      </form>
+    </div>
 
   </div>
 
@@ -109,22 +133,29 @@
       }
     }
     var dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-        initialSchedule = (document.location.hash == "")
-          ? dayNames.map(function(d) { return {"day": d, "schedule": [{}]}; })
-          : JSON.parse(decodeURIComponent(document.location.hash.slice(1)))["schedules"].map(function (e) {
-            e["schedule"] = e["schedule"].map(function(s) {
-              s["start"] = mergeTime(s["start"]);
-              s["end"] = mergeTime(s["end"]);
-              return s;
-            });
-            return e;
-          });
-    var v = new Vue({
+        initialSchedule;
+    if (document.location.hash == "") {
+      initialSchedule = dayNames.map(function(d) { return {"day": d, "schedule": [{}]}; });
+    } else {
+      var obj = JSON.parse(decodeURIComponent(document.location.hash.slice(1))),
+          root = Array.isArray(obj) ? obj : obj["schedules"];
+      initialSchedule = root.map(function (e) {
+        e["schedule"] = e["schedule"].map(function(s) {
+          s["start"] = mergeTime(s["start"]);
+          s["end"] = mergeTime(s["end"]);
+          return s;
+        });
+        return e;
+      });
+    }
+    window.v = new Vue({
       el: "#events",
       data: {
         schedule: initialSchedule,
         days: dayNames.map(function(d, i) { return {"id": i, "name": d, "shortName": d[0]}; }),
-        currentDay: {"id": 0, "name": "Monday"}
+        currentDay: {"id": 0, "name": "Monday"},
+        isJSONVisible: false,
+        json: ""
       },
       methods: {
         cancel: function(event) {
@@ -170,6 +201,15 @@
         openDay: function(day) {
           this.currentDay.id = day.id;
           this.currentDay.name = day.name;
+        },
+        showJSON: function(event) {
+          this.isJSONVisible = true;
+        },
+        backup: function(event) {
+          this.json = JSON.stringify(this.schedule);
+        },
+        restore: function(event) {
+          this.schedule = JSON.parse(this.json);
         }
       }
     });
