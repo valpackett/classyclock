@@ -143,6 +143,7 @@
         e["schedule"] = e["schedule"].map(function(s) {
           s["start"] = mergeTime(s["start"]);
           s["end"] = mergeTime(s["end"]);
+          s["subj"] = s["subj"].replace("+", " ");
           return s;
         });
         return e;
