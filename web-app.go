@@ -72,7 +72,7 @@ func mcsImportHandler(res http.ResponseWriter, req *http.Request) {
 		var name string
 		rows.Scan(&from_time, &to_time, &monday, &tuesday, &wednesday, &thursday, &friday, &saturday, &sunday, &name)
 		start := []int{from_time / 60, from_time % 60}
-		end := []int{to_time / 60, from_time % 60}
+		end := []int{to_time / 60, to_time % 60}
 		class := Class{start, end, name}
 		if monday == 1 {
 			mon.Schedule = append(mon.Schedule, class)
