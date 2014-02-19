@@ -10,36 +10,31 @@ static TextLayer *tl_next_class_time;
 static uint8_t do_retry = 0;
 static uint8_t is_nothing = 0;
 
+static TextLayer* text_layer_create_default(GRect rect) {
+  TextLayer *tl = text_layer_create(rect);
+  text_layer_set_text_alignment(tl, GTextAlignmentCenter);
+  text_layer_set_background_color(tl, GColorBlack);
+  text_layer_set_text_color(tl, GColorWhite);
+  text_layer_set_font(tl, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SIGNIKA_18)));
+  return tl;
+}
+
 static void handle_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
-  tl_current_time = text_layer_create((GRect) { .origin = { 0, 10 }, .size = { bounds.size.w, 50 } });
+  tl_current_time = text_layer_create_default((GRect) { .origin = { 0, 10 }, .size = { bounds.size.w, 50 } });
   text_layer_set_font(tl_current_time, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SIGNIKA_SUBSET_40)));
-  text_layer_set_text_alignment(tl_current_time, GTextAlignmentCenter);
-  text_layer_set_background_color(tl_current_time, GColorBlack);
-  text_layer_set_text_color(tl_current_time, GColorWhite);
   layer_add_child(window_layer, text_layer_get_layer(tl_current_time));
 
-  tl_current_date = text_layer_create((GRect) { .origin = { 0, 60 }, .size = { bounds.size.w, 30 } });
+  tl_current_date = text_layer_create_default((GRect) { .origin = { 0, 60 }, .size = { bounds.size.w, 30 } });
   text_layer_set_font(tl_current_date, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SIGNIKA_21)));
-  text_layer_set_text_alignment(tl_current_date, GTextAlignmentCenter);
-  text_layer_set_background_color(tl_current_date, GColorBlack);
-  text_layer_set_text_color(tl_current_date, GColorWhite);
   layer_add_child(window_layer, text_layer_get_layer(tl_current_date));
 
-  tl_next_class_subject = text_layer_create((GRect) { .origin = { 0, 100 }, .size = { bounds.size.w, 25 } });
-  text_layer_set_font(tl_next_class_subject, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SIGNIKA_18)));
-  text_layer_set_text_alignment(tl_next_class_subject, GTextAlignmentCenter);
-  text_layer_set_background_color(tl_next_class_subject, GColorBlack);
-  text_layer_set_text_color(tl_next_class_subject, GColorWhite);
+  tl_next_class_subject = text_layer_create_default((GRect) { .origin = { 0, 100 }, .size = { bounds.size.w, 25 } });
   layer_add_child(window_layer, text_layer_get_layer(tl_next_class_subject));
 
-  tl_next_class_time = text_layer_create((GRect) { .origin = { 0, 124 }, .size = { bounds.size.w, 25 } });
-  text_layer_set_font(tl_next_class_time, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SIGNIKA_18)));
-  text_layer_set_text_alignment(tl_next_class_time, GTextAlignmentCenter);
-  text_layer_set_background_color(tl_next_class_time, GColorBlack);
-  text_layer_set_text_color(tl_next_class_time, GColorWhite);
+  tl_next_class_time = text_layer_create_default((GRect) { .origin = { 0, 124 }, .size = { bounds.size.w, 25 } });
   layer_add_child(window_layer, text_layer_get_layer(tl_next_class_time));
 }
 
