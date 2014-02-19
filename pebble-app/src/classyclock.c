@@ -70,6 +70,7 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 static void handle_message_receive(DictionaryIterator *iter, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Received message from phone");
   do_retry = false;
   time_t now = time(NULL);
   struct tm *current_time = localtime(&now);
@@ -83,7 +84,7 @@ static void handle_message_receive(DictionaryIterator *iter, void *context) {
 
 static void handle_message_send_failed(DictionaryIterator *failed, AppMessageResult reason, void *context) {
   do_retry = true;
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "FAIL: %d", reason);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Sending message to phone failed with reason code %d", reason);
 }
 
 static void handle_init(void) {
