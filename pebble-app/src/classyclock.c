@@ -8,7 +8,6 @@ static TextLayer *tl_current_time;
 static TextLayer *tl_current_date;
 static TextLayer *tl_next_class_subject;
 static TextLayer *tl_next_class_time;
-static bool do_retry = false;
 
 static struct tm* current_time() {
   time_t now = time(NULL);
@@ -56,37 +55,31 @@ static void set_class_text(char* subject, char* time) {
 }
 
 static void update_next_class_time(struct tm *tick_time) {
-  ClassEvent event = data_next_class_event();
+  uint16_t current_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
+  ClassEvent event = data_next_class_event(current_minutes);
   if (event.is_nothing) {
     set_class_text("No more classes.", "See you tomorrow.");
     return;
   }
-  uint16_t current_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
   int16_t next_class_minutes_left = event.minutes - current_minutes;
-  if (next_class_minutes_left <= 0) {
-    set_class_text("Updating", "...");
-    data_request_from_phone();
-  } else {
-    set_class_text(event.subject, format_next_class_time(next_class_minutes_left, event.verb));
-  }
+  set_class_text(event.subject, format_next_class_time(next_class_minutes_left, event.verb));
 }
 
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
   text_layer_set_text(tl_current_time, format_time(tick_time));
   text_layer_set_text(tl_current_date, format_date(tick_time));
-  if (do_retry || (tick_time->tm_hour == 0 && tick_time->tm_min == 1)) data_request_from_phone();
+  if (tick_time->tm_wday != schedule_weekday) data_request_from_phone();
   update_next_class_time(tick_time);
 }
 
 static void handle_message_receive(DictionaryIterator *iter, void *context) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Received message from phone");
-  do_retry = false;
-  data_set_from_dict(iter);
-  update_next_class_time(current_time());
+  struct tm *cur_time = current_time();
+  data_set_from_dict(iter, cur_time);
+  update_next_class_time(cur_time);
 }
 
 static void handle_message_send_failed(DictionaryIterator *failed, AppMessageResult reason, void *context) {
-  do_retry = true;
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Sending message to phone failed with reason code %d", reason);
 }
 
@@ -99,7 +92,7 @@ static void handle_init(void) {
   });
   app_message_register_inbox_received(handle_message_receive);
   app_message_register_outbox_failed(handle_message_send_failed);
-  app_message_open(/* inbound_size: */ 128, /* outbound_size: */ 128);
+  app_message_open(/* inbound_size: */ 2048, /* outbound_size: */ 32);
   window_stack_push(window, /* animated: */ true);
   handle_minute_tick(current_time(), MINUTE_UNIT);
   tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);

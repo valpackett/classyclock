@@ -32,35 +32,30 @@ function flattenTime(time) {
 }
 
 function flattenSchedule(schedule) {
-  var result = [];
-  schedule.forEach(function(entry) {
-    result.push({
-      "time": flattenTime(entry["start"]),
-      "subj": entry["subj"],
-    });
-    result.push({
-      "time": flattenTime(entry["end"]),
-      "subj": entry["subj"],
-      "end": true
-    });
+  return schedule.map(function(entry) {
+    return {
+      "start": flattenTime(entry["start"]),
+      "end": flattenTime(entry["end"]),
+      "subj": entry["subj"]
+    };
   });
-  return result;
 }
 
-function getNextEvent(flat_schedule) {
-  var cur_date = new Date(),
-      cur_time = cur_date.getHours() * 60 + cur_date.getMinutes(),
-      result = {"nothing": true};
-  flat_schedule.forEach(function (entry) {
-    if (result["nothing"] && entry["time"] > cur_time) {
-      result = entry;
-    }
+function serializeSchedule(flat_schedule) {
+  var result = {},
+      ctr = 1;
+  flat_schedule.forEach(function(entry) {
+    result[String(ctr)] = ("0000" + String(entry["start"])).slice(-4) +
+      ("0000" + String(entry["end"])).slice(-4) +
+      entry["subj"];
+    ctr += 1;
   });
+  console.log("Serialized schedule: " + JSON.stringify(result));
   return result;
 }
 
 function sendNextEvent() {
-  Pebble.sendAppMessage(getNextEvent(flattenSchedule(getScheduleForToday())),
+  Pebble.sendAppMessage(serializeSchedule(flattenSchedule(getScheduleForToday())),
     function(e) {
       console.log("Successfully delivered message with transactionId=" + e.data.transactionId);
     },
