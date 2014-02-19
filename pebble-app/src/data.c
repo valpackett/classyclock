@@ -34,6 +34,10 @@ static void data_set_from_dict(DictionaryIterator* iter) {
   }
 }
 
+static ClassEvent data_next_class_event() {
+  return next_class_event;
+}
+
 static void data_request_from_phone() {
   Tuplet get_tuple = TupletInteger(MSG_KEY_GET, 1);
   DictionaryIterator *iter;
