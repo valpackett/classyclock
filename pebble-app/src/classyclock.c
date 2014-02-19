@@ -45,22 +45,24 @@ static void handle_window_unload(Window *window) {
   text_layer_destroy(tl_next_class_time);
 }
 
+static void set_class_text(char* subject, char* time) {
+  text_layer_set_text(tl_next_class_subject, subject);
+  text_layer_set_text(tl_next_class_time, time);
+}
+
 static void update_next_class_time(struct tm *tick_time) {
   ClassEvent event = data_next_class_event();
   if (event.is_nothing) {
-    text_layer_set_text(tl_next_class_subject, "No more classes.");
-    text_layer_set_text(tl_next_class_time, "See you tomorrow.");
+    set_class_text("No more classes.", "See you tomorrow.");
     return;
   }
   uint16_t current_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
   int16_t next_class_minutes_left = event.minutes - current_minutes;
   if (next_class_minutes_left <= 0) {
-    text_layer_set_text(tl_next_class_subject, "Updating");
-    text_layer_set_text(tl_next_class_time, "...");
+    set_class_text("Updating", "...");
     data_request_from_phone();
   } else {
-    text_layer_set_text(tl_next_class_subject, event.subject);
-    text_layer_set_text(tl_next_class_time, format_next_class_time(next_class_minutes_left, event.verb));
+    set_class_text(event.subject, format_next_class_time(next_class_minutes_left, event.verb));
   }
 }
 
