@@ -9,7 +9,6 @@ static TextLayer *tl_current_date;
 static TextLayer *tl_next_class_subject;
 static TextLayer *tl_next_class_time;
 static bool do_retry = false;
-static bool is_nothing = false;
 
 static TextLayer* text_layer_create_default(GRect rect) {
   TextLayer *tl = text_layer_create(rect);
@@ -47,18 +46,20 @@ static void handle_window_unload(Window *window) {
 }
 
 static void update_next_class_time(struct tm *tick_time) {
-  uint16_t current_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
-  int16_t next_class_minutes_left = next_class_minutes - current_minutes;
-  if (is_nothing) {
+  if (next_class_event.is_nothing) {
     text_layer_set_text(tl_next_class_subject, "No more classes.");
     text_layer_set_text(tl_next_class_time, "See you tomorrow.");
-  } else if (next_class_minutes_left <= 0) {
+    return;
+  }
+  uint16_t current_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
+  int16_t next_class_minutes_left = next_class_event.minutes - current_minutes;
+  if (next_class_minutes_left <= 0) {
     text_layer_set_text(tl_next_class_subject, "Updating");
     text_layer_set_text(tl_next_class_time, "...");
     data_request_from_phone();
   } else {
-    text_layer_set_text(tl_next_class_subject, next_class_subject);
-    text_layer_set_text(tl_next_class_time, format_next_class_time(next_class_minutes_left, next_class_verb));
+    text_layer_set_text(tl_next_class_subject, next_class_event.subject);
+    text_layer_set_text(tl_next_class_time, format_next_class_time(next_class_minutes_left, next_class_event.verb));
   }
 }
 
@@ -74,11 +75,7 @@ static void handle_message_receive(DictionaryIterator *iter, void *context) {
   do_retry = false;
   time_t now = time(NULL);
   struct tm *current_time = localtime(&now);
-  is_nothing = data_set_from_dict(iter);
-  if (is_nothing) {
-    uint16_t current_minutes = current_time->tm_hour * 60 + current_time->tm_min;
-    next_class_minutes = current_minutes + 10;
-  }
+  data_set_from_dict(iter);
   update_next_class_time(current_time);
 }
 

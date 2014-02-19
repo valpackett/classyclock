@@ -1,11 +1,14 @@
 #include <pebble.h>
 #include <stdbool.h>
 
-#define NEXT_CLASS_SUBJECT_SIZE 32
+typedef struct {
+  char *subject;
+  char *verb;
+  uint16_t minutes;
+  bool is_nothing;
+} ClassEvent;
 
-static char next_class_subject[NEXT_CLASS_SUBJECT_SIZE];
-static uint16_t next_class_minutes;
-static char *next_class_verb = "xxxxxx";
+static ClassEvent next_class_event;
 
 enum {
   MSG_KEY_NOTHING = 0x0,
@@ -15,22 +18,19 @@ enum {
   MSG_KEY_GET = 0x4
 };
 
-static bool data_set_from_dict(DictionaryIterator* iter) {
+static void data_set_from_dict(DictionaryIterator* iter) {
   Tuple *nothing_tuple = dict_find(iter, MSG_KEY_NOTHING);
   if (nothing_tuple) {
-    return true;
+    next_class_event.is_nothing = true;
   } else {
     Tuple *subj_tuple = dict_find(iter, MSG_KEY_SUBJ);
     Tuple *time_tuple = dict_find(iter, MSG_KEY_TIME);
     Tuple *end_tuple = dict_find(iter, MSG_KEY_END);
-    strncpy(next_class_subject, subj_tuple->value->cstring, NEXT_CLASS_SUBJECT_SIZE);
-    next_class_minutes = time_tuple->value->uint16;
-    if (end_tuple) {
-      next_class_verb = "ends";
-    } else {
-      next_class_verb = "begins";
-    }
-    return false;
+    next_class_event.is_nothing = false;
+    next_class_event.verb = end_tuple ? "ends" : "begins";
+    next_class_event.minutes = time_tuple->value->uint16;
+    next_class_event.subject = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+    strncpy(next_class_event.subject, subj_tuple->value->cstring, 32);
   }
 }
 
