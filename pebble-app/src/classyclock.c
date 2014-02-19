@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include "text.c"
 
 static Window *window;
 static TextLayer *tl_current_time;
@@ -6,7 +7,6 @@ static TextLayer *tl_current_date;
 static TextLayer *tl_next_class_subject;
 static TextLayer *tl_next_class_time;
 static char next_class_subject[32];
-static char next_class_time[32];
 static char *next_class_verb = "xxxxxx";
 static uint16_t next_class_minutes;
 static uint8_t do_retry = 0;
@@ -79,30 +79,13 @@ static void update_next_class_time(struct tm *tick_time) {
     text_layer_set_text(tl_next_class_time, "...");
   } else {
     text_layer_set_text(tl_next_class_subject, next_class_subject);
-    if (next_class_minutes_left > 60) {
-      snprintf(next_class_time, 32, "%s in %dh%dm", next_class_verb, next_class_minutes_left / 60, next_class_minutes_left % 60);
-    } else {
-      snprintf(next_class_time, 32, "%s in %d min.", next_class_verb, next_class_minutes_left);
-    }
-    text_layer_set_text(tl_next_class_time, next_class_time);
+    text_layer_set_text(tl_next_class_time, format_next_class_time(next_class_minutes_left, next_class_verb));
   }
   if (next_class_minutes_left <= 0) send_message_get();
 }
 
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
-  static char time_text[] = "00:00";
-  static char *time_format;
-  if (clock_is_24h_style()) {
-    time_format = "%R";
-  } else {
-    time_format = "%I:%M";
-  }
-  strftime(time_text, sizeof(time_text), time_format, tick_time);
-  if (!clock_is_24h_style() && (time_text[0] == '0')) {
-    // Remove the leading zero when 12-hour clock is used
-    memmove(time_text, &time_text[1], sizeof(time_text) - 1);
-  }
-  text_layer_set_text(tl_current_time, time_text);
+  text_layer_set_text(tl_current_time, format_time(tick_time));
 
   static char date_text[] = "Xxxxxxxxx 00";
   strftime(date_text, sizeof(date_text), "%a %b %e", tick_time);
