@@ -59,10 +59,12 @@ static void update_next_class_time(struct tm *tick_time) {
   ClassEvent event = data_next_class_event(current_minutes);
   if (event.is_nothing) {
     set_class_text("No more classes.", "See you tomorrow.");
-    return;
+  } else if (tick_time->tm_wday != schedule_weekday) {
+    set_class_text("Connect your phone", "& wait to update.");
+  } else {
+    int16_t next_class_minutes_left = event.minutes - current_minutes;
+    set_class_text(event.subject, format_next_class_time(next_class_minutes_left, event.verb));
   }
-  int16_t next_class_minutes_left = event.minutes - current_minutes;
-  set_class_text(event.subject, format_next_class_time(next_class_minutes_left, event.verb));
 }
 
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
