@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include <stdbool.h>
 #include "text.c"
 #include "data.c"
 
@@ -7,8 +8,8 @@ static TextLayer *tl_current_time;
 static TextLayer *tl_current_date;
 static TextLayer *tl_next_class_subject;
 static TextLayer *tl_next_class_time;
-static uint8_t do_retry = 0;
-static uint8_t is_nothing = 0;
+static bool do_retry = false;
+static bool is_nothing = false;
 
 static TextLayer* text_layer_create_default(GRect rect) {
   TextLayer *tl = text_layer_create(rect);
@@ -48,7 +49,7 @@ static void handle_window_unload(Window *window) {
 static void update_next_class_time(struct tm *tick_time) {
   uint16_t current_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
   int16_t next_class_minutes_left = next_class_minutes - current_minutes;
-  if (is_nothing == 1) {
+  if (is_nothing) {
     text_layer_set_text(tl_next_class_subject, "No more classes.");
     text_layer_set_text(tl_next_class_time, "See you tomorrow.");
   } else if (next_class_minutes_left <= 0) {
@@ -64,16 +65,16 @@ static void update_next_class_time(struct tm *tick_time) {
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
   text_layer_set_text(tl_current_time, format_time(tick_time));
   text_layer_set_text(tl_current_date, format_date(tick_time));
-  if (do_retry == 1 || (tick_time->tm_hour == 0 && tick_time->tm_min == 1)) data_request_from_phone();
+  if (do_retry || (tick_time->tm_hour == 0 && tick_time->tm_min == 1)) data_request_from_phone();
   update_next_class_time(tick_time);
 }
 
 static void handle_message_receive(DictionaryIterator *iter, void *context) {
-  do_retry = 0;
+  do_retry = false;
   time_t now = time(NULL);
   struct tm *current_time = localtime(&now);
   is_nothing = data_set_from_dict(iter);
-  if (is_nothing == 1) {
+  if (is_nothing) {
     uint16_t current_minutes = current_time->tm_hour * 60 + current_time->tm_min;
     next_class_minutes = current_minutes + 10;
   }
@@ -81,7 +82,7 @@ static void handle_message_receive(DictionaryIterator *iter, void *context) {
 }
 
 static void handle_message_send_failed(DictionaryIterator *failed, AppMessageResult reason, void *context) {
-  do_retry = 1;
+  do_retry = true;
   APP_LOG(APP_LOG_LEVEL_DEBUG, "FAIL: %d", reason);
 }
 

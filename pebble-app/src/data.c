@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include <stdbool.h>
 
 static char next_class_subject[32];
 static uint16_t next_class_minutes;
@@ -12,10 +13,10 @@ enum {
   MSG_KEY_GET = 0x4
 };
 
-static uint8_t data_set_from_dict(DictionaryIterator* iter) {
+static bool data_set_from_dict(DictionaryIterator* iter) {
   Tuple *nothing_tuple = dict_find(iter, MSG_KEY_NOTHING);
   if (nothing_tuple) {
-    return 1;
+    return true;
   } else {
     Tuple *subj_tuple = dict_find(iter, MSG_KEY_SUBJ);
     Tuple *time_tuple = dict_find(iter, MSG_KEY_TIME);
@@ -27,7 +28,7 @@ static uint8_t data_set_from_dict(DictionaryIterator* iter) {
     } else {
       next_class_verb = "begins";
     }
-    return 0;
+    return false;
   }
 }
 
