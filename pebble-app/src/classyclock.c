@@ -1,24 +1,14 @@
 #include <pebble.h>
 #include "text.c"
+#include "data.c"
 
 static Window *window;
 static TextLayer *tl_current_time;
 static TextLayer *tl_current_date;
 static TextLayer *tl_next_class_subject;
 static TextLayer *tl_next_class_time;
-static char next_class_subject[32];
-static char *next_class_verb = "xxxxxx";
-static uint16_t next_class_minutes;
 static uint8_t do_retry = 0;
 static uint8_t is_nothing = 0;
-
-enum {
-  MSG_KEY_NOTHING = 0x0,
-  MSG_KEY_TIME = 0x1,
-  MSG_KEY_SUBJ = 0x2,
-  MSG_KEY_END = 0x3,
-  MSG_KEY_GET = 0x4
-};
 
 static void handle_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
@@ -60,14 +50,6 @@ static void handle_window_unload(Window *window) {
   text_layer_destroy(tl_next_class_time);
 }
 
-static void send_message_get() {
-  Tuplet get_tuple = TupletInteger(MSG_KEY_GET, 1);
-  DictionaryIterator *iter;
-  if (app_message_outbox_begin(&iter) != APP_MSG_OK) return;
-  if (dict_write_tuplet(iter, &get_tuple) != DICT_OK) return;
-  app_message_outbox_send();
-}
-
 static void update_next_class_time(struct tm *tick_time) {
   uint16_t current_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
   int16_t next_class_minutes_left = next_class_minutes - current_minutes;
@@ -81,7 +63,7 @@ static void update_next_class_time(struct tm *tick_time) {
     text_layer_set_text(tl_next_class_subject, next_class_subject);
     text_layer_set_text(tl_next_class_time, format_next_class_time(next_class_minutes_left, next_class_verb));
   }
-  if (next_class_minutes_left <= 0) send_message_get();
+  if (next_class_minutes_left <= 0) data_request_from_phone();
 }
 
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
@@ -91,31 +73,18 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
   strftime(date_text, sizeof(date_text), "%a %b %e", tick_time);
   text_layer_set_text(tl_current_date, date_text);
 
-  if (do_retry == 1 || (tick_time->tm_hour == 0 && tick_time->tm_min == 1)) send_message_get();
+  if (do_retry == 1 || (tick_time->tm_hour == 0 && tick_time->tm_min == 1)) data_request_from_phone();
   update_next_class_time(tick_time);
 }
 
 static void handle_message_receive(DictionaryIterator *iter, void *context) {
   do_retry = 0;
-  Tuple *nothing_tuple = dict_find(iter, MSG_KEY_NOTHING);
   time_t now = time(NULL);
   struct tm *current_time = localtime(&now);
-  if (nothing_tuple) {
-    is_nothing = 1;
+  is_nothing = data_set_from_dict(iter);
+  if (is_nothing == 1) {
     uint16_t current_minutes = current_time->tm_hour * 60 + current_time->tm_min;
     next_class_minutes = current_minutes + 10;
-  } else {
-    is_nothing = 0;
-    Tuple *subj_tuple = dict_find(iter, MSG_KEY_SUBJ);
-    Tuple *time_tuple = dict_find(iter, MSG_KEY_TIME);
-    Tuple *end_tuple = dict_find(iter, MSG_KEY_END);
-    strncpy(next_class_subject, subj_tuple->value->cstring, 32);
-    next_class_minutes = time_tuple->value->uint16;
-    if (end_tuple) {
-      next_class_verb = "ends";
-    } else {
-      next_class_verb = "begins";
-    }
   }
   update_next_class_time(current_time);
 }
