@@ -56,7 +56,7 @@ static void handle_window_load(Window *window) {
 static void handle_window_unload(Window *window) {
   text_layer_destroy(tl_current_time);
   text_layer_destroy(tl_current_date);
-  text_layer_destroy(tl_next_class_time);
+  text_layer_destroy(tl_next_class_subject);
   text_layer_destroy(tl_next_class_time);
 }
 
