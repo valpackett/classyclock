@@ -10,7 +10,7 @@ typedef struct {
   char *verb;
   uint16_t minutes;
   bool is_nothing;
-} ClassEvent;
+} __attribute__((__packed__)) ClassEvent;
 
 static ClassEvent schedule[SCHED_LENGTH];
 static uint8_t schedule_weekday;
