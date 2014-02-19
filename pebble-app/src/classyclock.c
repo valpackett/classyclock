@@ -54,11 +54,11 @@ static void update_next_class_time(struct tm *tick_time) {
   } else if (next_class_minutes_left <= 0) {
     text_layer_set_text(tl_next_class_subject, "Updating");
     text_layer_set_text(tl_next_class_time, "...");
+    data_request_from_phone();
   } else {
     text_layer_set_text(tl_next_class_subject, next_class_subject);
     text_layer_set_text(tl_next_class_time, format_next_class_time(next_class_minutes_left, next_class_verb));
   }
-  if (next_class_minutes_left <= 0) data_request_from_phone();
 }
 
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
