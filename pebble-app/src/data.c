@@ -1,7 +1,9 @@
 #include <pebble.h>
 #include <stdbool.h>
 
-static char next_class_subject[32];
+#define NEXT_CLASS_SUBJECT_SIZE 32
+
+static char next_class_subject[NEXT_CLASS_SUBJECT_SIZE];
 static uint16_t next_class_minutes;
 static char *next_class_verb = "xxxxxx";
 
@@ -21,7 +23,7 @@ static bool data_set_from_dict(DictionaryIterator* iter) {
     Tuple *subj_tuple = dict_find(iter, MSG_KEY_SUBJ);
     Tuple *time_tuple = dict_find(iter, MSG_KEY_TIME);
     Tuple *end_tuple = dict_find(iter, MSG_KEY_END);
-    strncpy(next_class_subject, subj_tuple->value->cstring, 32);
+    strncpy(next_class_subject, subj_tuple->value->cstring, NEXT_CLASS_SUBJECT_SIZE);
     next_class_minutes = time_tuple->value->uint16;
     if (end_tuple) {
       next_class_verb = "ends";
