@@ -10,6 +10,11 @@ static TextLayer *tl_next_class_subject;
 static TextLayer *tl_next_class_time;
 static bool do_retry = false;
 
+static struct tm* current_time() {
+  time_t now = time(NULL);
+  return localtime(&now);
+}
+
 static TextLayer* text_layer_create_default(GRect rect) {
   TextLayer *tl = text_layer_create(rect);
   text_layer_set_text_alignment(tl, GTextAlignmentCenter);
@@ -76,10 +81,8 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 static void handle_message_receive(DictionaryIterator *iter, void *context) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Received message from phone");
   do_retry = false;
-  time_t now = time(NULL);
-  struct tm *current_time = localtime(&now);
   data_set_from_dict(iter);
-  update_next_class_time(current_time);
+  update_next_class_time(current_time());
 }
 
 static void handle_message_send_failed(DictionaryIterator *failed, AppMessageResult reason, void *context) {
@@ -98,9 +101,7 @@ static void handle_init(void) {
   app_message_register_outbox_failed(handle_message_send_failed);
   app_message_open(/* inbound_size: */ 128, /* outbound_size: */ 128);
   window_stack_push(window, /* animated: */ true);
-  time_t now = time(NULL);
-  struct tm *current_time = localtime(&now);
-  handle_minute_tick(current_time, MINUTE_UNIT);
+  handle_minute_tick(current_time(), MINUTE_UNIT);
   tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
 }
 
