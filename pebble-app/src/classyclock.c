@@ -63,11 +63,7 @@ static void update_next_class_time(struct tm *tick_time) {
 
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
   text_layer_set_text(tl_current_time, format_time(tick_time));
-
-  static char date_text[] = "Xxxxxxxxx 00";
-  strftime(date_text, sizeof(date_text), "%a %b %e", tick_time);
-  text_layer_set_text(tl_current_date, date_text);
-
+  text_layer_set_text(tl_current_date, format_date(tick_time));
   if (do_retry == 1 || (tick_time->tm_hour == 0 && tick_time->tm_min == 1)) data_request_from_phone();
   update_next_class_time(tick_time);
 }

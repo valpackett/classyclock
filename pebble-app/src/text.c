@@ -16,6 +16,12 @@ static char* format_time(struct tm *tick_time) {
   return time_text;
 }
 
+static char* format_date(struct tm *tick_time) {
+  static char date_text[] = "Xxxxxxxxx 00";
+  strftime(date_text, sizeof(date_text), "%a %b %e", tick_time);
+  return date_text;
+}
+
 static char* format_next_class_time(int next_class_minutes_left, char* next_class_verb) {
   static char next_class_time[32];
   if (next_class_minutes_left > 60) {
