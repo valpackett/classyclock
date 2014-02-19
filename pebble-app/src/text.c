@@ -1,5 +1,7 @@
 #include <pebble.h>
 
+#define NEXT_CLASS_TIME_SIZE 32
+
 static char* format_time(struct tm *tick_time) {
   static char time_text[] = "00:00";
   static char *time_format;
@@ -23,11 +25,11 @@ static char* format_date(struct tm *tick_time) {
 }
 
 static char* format_next_class_time(int next_class_minutes_left, char* next_class_verb) {
-  static char next_class_time[32];
+  static char next_class_time[NEXT_CLASS_TIME_SIZE];
   if (next_class_minutes_left > 60) {
-    snprintf(next_class_time, 32, "%s in %dh%dm", next_class_verb, next_class_minutes_left / 60, next_class_minutes_left % 60);
+    snprintf(next_class_time, NEXT_CLASS_TIME_SIZE, "%s in %dh%dm", next_class_verb, next_class_minutes_left / 60, next_class_minutes_left % 60);
   } else {
-    snprintf(next_class_time, 32, "%s in %d min.", next_class_verb, next_class_minutes_left);
+    snprintf(next_class_time, NEXT_CLASS_TIME_SIZE, "%s in %d min.", next_class_verb, next_class_minutes_left);
   }
   return next_class_time;
 }
