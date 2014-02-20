@@ -65,7 +65,7 @@ static void update_next_class_time(struct tm *tick_time) {
   } else {
     int16_t next_class_minutes_left = event.minutes - current_minutes;
     static char *subject = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // fucking cstrings
-    fucking_copy_string(subject, event.subject, 32);
+    fucking_copy_string(subject, event.subject, SUBJECT_LENGTH); // i can't even
     set_class_text(subject, format_next_class_time(next_class_minutes_left, event.verb));
   }
 }

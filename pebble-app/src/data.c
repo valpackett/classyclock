@@ -7,11 +7,14 @@
 // 40 = 20 beginnings + 20 endings
 // I hope nobody actually has more than 20 classes per day
 
+#define SUBJECT_LENGTH 32
+#define VERB_LENGTH 7
+
 typedef struct {
   uint16_t minutes;
   bool is_nothing;
-  char subject[32];
-  char verb[7];
+  char subject[SUBJECT_LENGTH];
+  char verb[VERB_LENGTH];
 } __attribute__((__packed__)) ClassEvent;
 
 static ClassEvent schedule[SCHED_LENGTH];
@@ -23,9 +26,9 @@ enum {
 
 static void set_schedule_entry(uint8_t j, uint16_t minutes, char *subject) {
   schedule[j].is_nothing = false;
-  fucking_copy_string(schedule[j].verb, j % 2 == 0 ? "begins" : "ends", 7);
+  fucking_copy_string(schedule[j].verb, j % 2 == 0 ? "begins" : "ends", VERB_LENGTH);
   schedule[j].minutes = minutes;
-  fucking_copy_string(schedule[j].subject, subject, 32);
+  fucking_copy_string(schedule[j].subject, subject, SUBJECT_LENGTH);
 }
 
 static void data_persist() {
