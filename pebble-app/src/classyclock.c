@@ -1,6 +1,5 @@
 #include <pebble.h>
 #include <stdbool.h>
-#include "util.c"
 #include "text.c"
 #include "data.c"
 

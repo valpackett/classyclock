@@ -15,7 +15,7 @@ typedef struct {
   bool is_nothing;
   char subject[SUBJECT_LENGTH];
   char verb[VERB_LENGTH];
-} __attribute__((__packed__)) ClassEvent;
+} ClassEvent;
 
 static ClassEvent schedule[SCHED_LENGTH];
 static uint8_t schedule_weekday;
