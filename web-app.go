@@ -17,12 +17,13 @@ import (
 func main() {
 	var port = os.Getenv("PORT")
 	var settingsHtml []byte
-	settingsHtml, err := ioutil.ReadFile("settings.html")
+	settingsHtml, err := ioutil.ReadFile("./settings-app/settings.html")
 	if err != nil {
 		panic(err)
 	}
 	var hh = makeHtmlHandler(settingsHtml)
 	http.HandleFunc("/", hh)
+	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./settings-app/"))))
 	http.HandleFunc("/import/myclassschedule", mcsImportHandler)
 	fmt.Println("Server started on port " + port)
 	err = http.ListenAndServe(":"+port, nil)

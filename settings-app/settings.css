@@ -1,0 +1,33 @@
+.content { padding-top: 1em; }
+.pad-block { padding: 10px; }
+.little-help { font-size: smaller; color: #999; margin: 1em 0; }
+.content > a.button-block { margin: 10px; }
+.hidden { display: none; }
+.sched-list li {
+  overflow: hidden;
+  padding-bottom: 10px;
+  padding-right: 10px;
+}
+.actionbar {
+  width: 12%;
+  float: right;
+  border-left: solid 1px #eee;
+  padding-left: 2%;
+}
+form.input-group {
+  width: 83%;
+  float: left;
+}
+.actionbar a.button-block {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  position: relative;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  width: 100%;
+  top: 0;
+  right: 0;
+}
+

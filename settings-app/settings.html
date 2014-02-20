@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ratchet/1.0.1/ratchet.min.css">
+<link rel="stylesheet" href="/static/settings.css">
+
+<body id="events">
+  <header class="bar-title">
+    <a class="button" v-on="click: cancel">
+      Cancel
+    </a>
+    <h1 class="title">Classy Clock</h1>
+    <a class="button" v-on="click: save">
+      Save
+    </a>
+  </header>
+
+  <nav class="bar-standard bar-header-secondary">
+    <ul class="segmented-controller">
+      <li v-repeat="days" v-class="active: this.id == currentDay.id">
+        <a v-on="click: openDay(this)">{{shortName}}</a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="content">
+
+    <ul class="inset list sched-list" v-repeat="schedule" v-class="hidden: this.day != currentDay.name">
+      <li v-repeat="schedule">
+        <div class="actionbar">
+          <a class="button-negative button-block" v-on="click: remove" data-id="{{$index}}">x</a>
+          <a class="button-block" v-on="click: moveUp" data-id="{{$index}}">&uarr;</a>
+          <a class="button-block" v-on="click: moveDown" data-id="{{$index}}">&darr;</a>
+        </div>
+        <form class="input-group">
+          <div class="input-row">
+            <label for="subject-{{$index}}">Subject</label>
+            <input id="subject-{{$index}}" type="text" maxlength="32" required v-model="subj">
+          </div>
+          <div class="input-row">
+            <label for="start-{{$index}}">Start</label>
+            <input id="start-{{$index}}" type="time" step="60" required v-model="start">
+          </div>
+          <div class="input-row">
+            <label for="end-{{$index}}">End</label>
+            <input id="end-{{$index}}" type="time" step="60" required v-model="end">
+          </div>
+        </form>
+      </li>
+    </ul>
+
+    <a class="button-positive button-block" v-on="click: add">Add class</a>
+    <a class="button-block" v-on="click: showJSON" v-class="hidden: isJSONVisible == true">Backup/Restore/Import</a>
+
+    <div class="pad-block" v-class="hidden: isJSONVisible == false">
+      <form action="/import/myclassschedule" method="POST" enctype="multipart/form-data">
+        <textarea rows="5" v-model="json"></textarea>
+        <a class="button" v-on="click: backup">Backup</a>
+        <a class="button" v-on="click: restore">Restore</a>
+        <p class="little-help">
+          To backup: tap Backup, copy the text, paste it somewhere (in your favorite notes app).<br>
+          To restore: copy the text of your backup, paste it above, tap Restore.
+        </p>
+        <h3>Import from My Class Schedule</h3>
+        <p class="little-help">
+          Make sure you have Firefox and a file manager such as Cabinet or Sliding Explorer installed on your device.<br>
+          Go to My Class Schedule &rarr; Settings &rarr; Backup / Restore &rarr; Create new backup.<br>
+          Open this settings page in Firefox (because the file picker doesn't work - it's an Android bug): <a href="https://classyclock.herokuapp.com/">https://classyclock.herokuapp.com</a><br>
+          Tap the file chooser here, select your file manager, go to your SD Card &rarr; My Class Schedule and choose the latest backup file.
+          Tap Import. Then, make a backup, reopen this settings page in the Pebble app, paste and restore.
+        </p>
+        <input type="file" name="database">
+        <button type="submit" class="button">Import</button>
+      </form>
+    </div>
+
+  </div>
+
+  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.8.3/vue.min.js"></script>
+  <script src="/static/settings.js"></script>
+</body>
