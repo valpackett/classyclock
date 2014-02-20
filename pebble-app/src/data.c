@@ -3,9 +3,9 @@
 #include <limits.h>
 #include "util.c"
 
-#define SCHED_LENGTH 20
-// 20 = 10 beginnings + 10 endings
-// I hope nobody actually has more than 10 classes per day
+#define SCHED_LENGTH 40
+// 40 = 20 beginnings + 20 endings
+// I hope nobody actually has more than 20 classes per day
 
 typedef struct {
   uint16_t minutes;
