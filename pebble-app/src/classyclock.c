@@ -10,11 +10,6 @@ static TextLayer *tl_current_date;
 static TextLayer *tl_next_class_subject;
 static TextLayer *tl_next_class_time;
 
-static struct tm* current_time() {
-  time_t now = time(NULL);
-  return localtime(&now);
-}
-
 static TextLayer* text_layer_create_default(GRect rect) {
   TextLayer *tl = text_layer_create(rect);
   text_layer_set_text_alignment(tl, GTextAlignmentCenter);
@@ -58,10 +53,10 @@ static void set_class_text(char* subject, char* time) {
 static void update_next_class_time(struct tm *tick_time) {
   uint16_t current_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
   ClassEvent event = data_next_class_event(current_minutes);
-  if (event.is_nothing) {
-    set_class_text("No more classes.", "See you tomorrow.");
-  } else if (tick_time->tm_wday != schedule_weekday) {
+  if (tick_time->tm_wday != schedule_weekday) {
     set_class_text("Connect phone", "& wait to update.");
+  } else if (event.is_nothing) {
+    set_class_text("No more classes.", "See you tomorrow.");
   } else {
     int16_t next_class_minutes_left = event.minutes - current_minutes;
     static char *subject = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // fucking cstrings
@@ -89,7 +84,6 @@ static void handle_message_send_failed(DictionaryIterator *failed, AppMessageRes
 }
 
 static void handle_init(void) {
-  data_read_persisted();
   window = window_create();
   window_set_background_color(window, GColorBlack);
   window_set_window_handlers(window, (WindowHandlers) {
@@ -99,6 +93,7 @@ static void handle_init(void) {
   app_message_register_inbox_received(handle_message_receive);
   app_message_register_outbox_failed(handle_message_send_failed);
   app_message_open(/* inbound_size: */ 2048, /* outbound_size: */ 32);
+  data_read_persisted();
   window_stack_push(window, /* animated: */ true);
   handle_minute_tick(current_time(), MINUTE_UNIT);
   tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
