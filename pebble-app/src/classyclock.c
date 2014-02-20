@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include <stdbool.h>
+#include "util.c"
 #include "text.c"
 #include "data.c"
 
@@ -63,7 +64,9 @@ static void update_next_class_time(struct tm *tick_time) {
     set_class_text("Connect phone", "& wait to update.");
   } else {
     int16_t next_class_minutes_left = event.minutes - current_minutes;
-    set_class_text(event.subject, format_next_class_time(next_class_minutes_left, event.verb));
+    static char *subject = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // fucking cstrings
+    fucking_copy_string(subject, event.subject, 32);
+    set_class_text(subject, format_next_class_time(next_class_minutes_left, event.verb));
   }
 }
 
@@ -86,6 +89,7 @@ static void handle_message_send_failed(DictionaryIterator *failed, AppMessageRes
 }
 
 static void handle_init(void) {
+  data_read_persisted();
   window = window_create();
   window_set_background_color(window, GColorBlack);
   window_set_window_handlers(window, (WindowHandlers) {

@@ -1,15 +1,17 @@
 #include <pebble.h>
 #include <stdbool.h>
+#include <limits.h>
+#include "util.c"
 
 #define SCHED_LENGTH 20
 // 20 = 10 beginnings + 10 endings
 // I hope nobody actually has more than 10 classes per day
 
 typedef struct {
-  char *subject;
-  char *verb;
   uint16_t minutes;
   bool is_nothing;
+  char subject[32];
+  char verb[7];
 } __attribute__((__packed__)) ClassEvent;
 
 static ClassEvent schedule[SCHED_LENGTH];
@@ -21,15 +23,29 @@ enum {
 
 static void set_schedule_entry(uint8_t j, uint16_t minutes, char *subject) {
   schedule[j].is_nothing = false;
-  schedule[j].verb = j % 2 == 0 ? "begins" : "ends";
+  fucking_copy_string(schedule[j].verb, j % 2 == 0 ? "begins" : "ends", 7);
   schedule[j].minutes = minutes;
-  schedule[j].subject = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-  strncpy(schedule[j].subject, subject, 32);
-  /* APP_LOG(APP_LOG_LEVEL_DEBUG, "schedule [%d] = %s %s in %d", j, schedule[j].subject, schedule[j].verb, schedule[j].minutes); */
+  fucking_copy_string(schedule[j].subject, subject, 32);
+}
+
+static void data_persist() {
+  persist_write_int(INT_MAX, schedule_weekday);
+  for (uint8_t i = 0; i < SCHED_LENGTH; i++) {
+    persist_write_data(i, &schedule[i], sizeof(schedule[i]));
+  }
+}
+
+static void data_read_persisted() {
+  if (persist_exists(INT_MAX)) {
+    schedule_weekday = persist_read_int(INT_MAX);
+  }
+  for (uint8_t i = 0; i < SCHED_LENGTH; i++) {
+    if (persist_exists(i)) persist_read_data(i, &schedule[i], sizeof(schedule[i]));
+  }
 }
 
 static uint16_t extract_number(char *s, uint8_t from, uint8_t len) {
-  char buf[len];
+  char buf[len]; // I don't have any fucking idea why adding +1 for the \0 fucks everything up
   strncpy(buf, s + from, len);
   return atoi(buf);
 }
@@ -45,6 +61,7 @@ static void data_set_from_dict(DictionaryIterator* iter, struct tm *cur_time) {
     }
     j++;
   }
+  data_persist();
 }
 
 static ClassEvent data_next_class_event(uint16_t current_minutes) {
