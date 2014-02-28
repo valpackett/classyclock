@@ -54,6 +54,7 @@ static uint16_t extract_number(char *s, uint8_t from, uint8_t len) {
 }
 
 static void data_set_from_dict(DictionaryIterator* iter, struct tm *cur_time) {
+  memset(&schedule, 0, sizeof(schedule));
   schedule_weekday = cur_time->tm_wday;
   uint8_t j = 0;
   for (uint8_t i = 1; i <= SCHED_LENGTH; i++) {
