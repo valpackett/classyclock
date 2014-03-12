@@ -4,7 +4,7 @@
   "longName": "Classy Clock",
   "companyName": "{ float: both }",
   "versionCode": 2,
-  "versionLabel": "1.1.0",
+  "versionLabel": "1.1.1",
   "capabilities": [ "configurable" ],
   "watchapp": {
     "watchface": true
