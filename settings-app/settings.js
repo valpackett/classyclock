@@ -140,12 +140,11 @@ window.v = new Vue({
 
 function ruGet(url, callback) {
 	ruSpinner.spin(ruSpinnerTarget);
-	superagent.get(RU_API + url).end(function(err, res) {
+	superagent.get(RU_API + url).timeout(10000).end(function(err, res) {
 		ruSpinner.stop();
 		if (err || res.error) this.ruLoadStage = -1;
 		else {
-			var j = JSON.parse(res.text);
-			if (j.success) callback.bind(this)(j.data);
+			if (res.body.success) callback.bind(this)(res.body.data);
 			else this.ruLoadStage = -1
 		}
 	}.bind(this));
