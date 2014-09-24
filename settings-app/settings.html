@@ -3,9 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ratchet/2.0.2/css/ratchet.min.css">
 <script>
-	var ua = navigator.userAgent.toLowerCase();
-	var theme = ua.indexOf('android') > -1 ? 'android' : 'ios';
-	alert(theme);
+	var theme = navigator.userAgent.toLowerCase().indexOf('android') > -1 ? 'android' : 'ios';
 	document.write('<li'+'nk rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ratchet/2.0.2/css/ratchet-theme-'+theme+'.min.css">');
 </script>
 <link rel="stylesheet" href="/static/settings.css">

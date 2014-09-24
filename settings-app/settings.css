@@ -1,5 +1,6 @@
 textarea { resize: vertical; }
 .content { padding-top: 1em; }
+.content-padded { padding-bottom: 70px; }
 .little-help { font-size: smaller; color: #999; margin: 1em 0; }
 .content > a.button-block { margin: 10px; }
 .hidden { display: none; }
