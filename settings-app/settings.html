@@ -2,7 +2,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ratchet/2.0.2/css/ratchet.min.css">
-<script>document.write('<li'+'nk rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ratchet/2.0.2/css/ratchet-theme-'+navigator.userAgent.toLowerCase().indexOf('android') > -1 ? 'android' : 'ios'+'.min.css">');</script>
+<script>
+	var ua = navigator.userAgent.toLowerCase();
+	document.write('<li'+'nk rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ratchet/2.0.2/css/ratchet-theme-'+(ua.indexOf('dalvik') > -1 || ua.indexOf('android') > 1) ? 'android' : 'ios'+'.min.css">');
+</script>
 <link rel="stylesheet" href="/static/settings.css">
 
 <body id="events">
