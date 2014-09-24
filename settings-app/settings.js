@@ -1,3 +1,8 @@
+var RU_API = '/ru/api/v1/';
+
+var ruSpinnerTarget = document.getElementById("ru-spinner");
+var ruSpinner = new Spinner({});
+
 function splitTime(t) {
 	return t.split(":").slice(0, 2).map(function (i) { return parseInt(i); });
 }
@@ -46,6 +51,8 @@ window.v = new Vue({
 		days: dayNames.map(function(d, i) { return {"id": i, "name": d, "shortName": d[0]}; }),
 		currentDay: {"id": 0, "name": "Monday"},
 		isJSONVisible: false,
+		ruLoadStage: 0,
+		ruCities: [],
 		json: ""
 	},
 	methods: {
@@ -68,9 +75,7 @@ window.v = new Vue({
 					e["start"] = splitTime(e["start"]);
 					e["end"] = splitTime(e["end"]);
 					return e;
-				}).sort(function(a, b) {
-					return (a["start"][0] * 60 + a["start"][1]) - (b["start"][0] * 60 + b["start"][1]);
-				});
+				}).sort(schedCompare);
 				return s;
 			});
 			var data = JSON.stringify({"schedules": schedule});
@@ -93,17 +98,75 @@ window.v = new Vue({
 			this.currentDay.id = day.id;
 			this.currentDay.name = day.name;
 		},
-		showJSON: function(event) {
-			this.isJSONVisible = true;
-		},
-		hideJSON: function(event) {
-			this.isJSONVisible = false;
-		},
 		backup: function(event) {
 			this.json = JSON.stringify(this.schedule);
 		},
 		restore: function(event) {
 			this.schedule = JSON.parse(this.json);
+		},
+		ruLoadCities: function(event) {
+			ruGet.bind(this)("cities", function(data) {
+				this.ruCities = data;
+				this.ruLoadStage = 1;
+			});
+		},
+		ruLoadUniversities: function(event) {
+			ruGet.bind(this)('cities/' + this.ruSelectedCity + '/alluniversities', function(data) {
+				this.ruUniversities = data.universities;
+				this.ruLoadStage = 2;
+			});
+		},
+		ruLoadFaculties: function(event) {
+			ruGet.bind(this)('universities/' + this.ruSelectedUniversity + '/faculties', function(data) {
+				this.ruFaculties = data;
+				this.ruLoadStage = 3;
+			});
+		},
+		ruLoadGroups: function(event) {
+			ruGet.bind(this)('faculties/' + this.ruSelectedFaculty + '/groups', function(data) {
+				this.ruGroups = data;
+				this.ruLoadStage = 4;
+			});
+		},
+		ruLoadSchedule: function(event) {
+			ruGet.bind(this)('groups/' + this.ruSelectedGroup, function(data) {
+				this.schedule = convertRuSchedule(data);
+				this.backup();
+				this.ruLoadStage = 5;
+			});
 		}
 	}
 });
+
+function ruGet(url, callback) {
+	ruSpinner.spin(ruSpinnerTarget);
+	superagent.get(RU_API + url).end(function(err, res) {
+		ruSpinner.stop();
+		if (err || res.error) this.ruLoadStage = -1;
+		else {
+			var j = JSON.parse(res.text);
+			if (j.success) callback.bind(this)(j.data);
+			else this.ruLoadStage = -1
+		}
+	}.bind(this));
+}
+
+function convertRuSchedule(data) {
+	return data.days.map(function(day) {
+		return {
+			day: dayNames[day.weekday - 1],
+			schedule: day.lessons.map(function(lesson) {
+				var rooms = lesson.auditories.map(function(aud) { return aud.auditory_name });
+				return {
+					subj: (rooms.length > 0 ? rooms.join(',') + ' ' : '') + lesson.subject,
+					start: lesson.time_start,
+					end: lesson.time_end
+				}
+			}).sort(schedCompare)
+		}
+	});
+}
+
+function schedCompare(a, b) {
+	return (a["start"][0] * 60 + a["start"][1]) - (b["start"][0] * 60 + b["start"][1]);
+}

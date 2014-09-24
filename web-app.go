@@ -6,12 +6,14 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"os"
 	"strings"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -24,6 +26,7 @@ func main() {
 	var hh = makeHtmlHandler(settingsHtml)
 	http.HandleFunc("/", hh)
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./settings-app/"))))
+	http.Handle("/ru/", http.StripPrefix("/ru", httputil.NewSingleHostReverseProxy(&url.URL{Scheme: "https", Host: "raspisaniye-vuzov.ru"})))
 	http.HandleFunc("/import/myclassschedule", mcsImportHandler)
 	fmt.Println("Server started on port " + port)
 	err = http.ListenAndServe(":"+port, nil)
