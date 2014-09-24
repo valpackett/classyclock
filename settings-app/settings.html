@@ -4,7 +4,9 @@
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ratchet/2.0.2/css/ratchet.min.css">
 <script>
 	var ua = navigator.userAgent.toLowerCase();
-	document.write('<li'+'nk rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ratchet/2.0.2/css/ratchet-theme-'+ua.indexOf('android') > -1 ? 'android' : 'ios'+'.min.css">');
+	var theme = ua.indexOf('android') > -1 ? 'android' : 'ios';
+	alert(theme);
+	document.write('<li'+'nk rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ratchet/2.0.2/css/ratchet-theme-'+theme+'.min.css">');
 </script>
 <link rel="stylesheet" href="/static/settings.css">
 
