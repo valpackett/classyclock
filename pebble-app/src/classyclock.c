@@ -14,7 +14,7 @@ static TextLayer* text_layer_create_default(GRect rect) {
   text_layer_set_text_alignment(tl, GTextAlignmentCenter);
   text_layer_set_background_color(tl, GColorBlack);
   text_layer_set_text_color(tl, GColorWhite);
-  text_layer_set_font(tl, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SIGNIKA_18)));
+  /* text_layer_set_font(tl, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SIGNIKA_18))); */
   return tl;
 }
 

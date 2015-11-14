@@ -4,6 +4,13 @@
   "longName": "Classy Clock",
   "companyName": "{ float: both }",
   "versionLabel": "1.2",
+  "versionCode": "12",
+  "sdkVersion": "3",
+  "targetPlatforms": [
+    "aplite",
+    "basalt",
+    "chalk"
+  ],
   "capabilities": [ "configurable" ],
   "watchapp": {
     "watchface": true
