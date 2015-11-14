@@ -40,6 +40,7 @@ type Day struct {
 }
 
 func mcsImportHandler(res http.ResponseWriter, req *http.Request) {
+	req.Body = http.MaxBytesReader(res, req.Body, 640*1024)
 	dbFile, _, _ := req.FormFile("database")
 	dbBytes, _ := ioutil.ReadAll(dbFile)
 	var randNum int32
