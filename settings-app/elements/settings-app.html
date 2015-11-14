@@ -91,6 +91,16 @@
 							Tap Import. Then, make a backup, reopen this settings page in the Pebble app, paste and restore.
 						</p>
 					</paper-material>
+					<paper-material class="card settings-card" elevation="1">
+						<h2>Import from ruz.hse.ru</h2>
+						<form id="ruz-import-form" action="/classyclock/import/ruz" method="GET">
+							<label>
+								edu email:
+								<paper-input type="email" name="email" value="{{ruzEmail}}"></paper-input>
+							</label>
+							<paper-button on-tap="submitRuz">Import</paper-button>
+						</form>
+					</paper-material>
 				</div>
 
 				<template is="dom-repeat" items="[[data.schedules]]" as="day">
@@ -144,6 +154,7 @@
 		properties: {
 			selectedTab: { type: Number, value: 0 },
 			backupText: { type: String, value: '' },
+			ruzEmail: { type: String, value: localStorage.getItem('ruzEmail') || '' },
 			currentUrl: { type: String, value: document.location.href.replace(/[#?].*/, '') },
 			data: { type: Object, value: { } },
 		},
@@ -186,6 +197,10 @@
 		},
 		submitClassschedule: function () {
 			this.$['classschedule-import-form'].submit()
+		},
+		submitRuz: function () {
+			localStorage.setItem('ruzEmail', this.ruzEmail)
+			this.$['ruz-import-form'].submit()
 		},
 
 		addEntry: function (e) {
