@@ -104,67 +104,8 @@ window.v = new Vue({
 		restore: function(event) {
 			this.schedule = JSON.parse(this.json);
 		},
-		ruLoadCities: function(event) {
-			ruGet.bind(this)("cities", function(data) {
-				this.ruCities = data;
-				this.ruLoadStage = 1;
-			});
-		},
-		ruLoadUniversities: function(event) {
-			ruGet.bind(this)('cities/' + this.ruSelectedCity + '/alluniversities', function(data) {
-				this.ruUniversities = data.universities;
-				this.ruLoadStage = 2;
-			});
-		},
-		ruLoadFaculties: function(event) {
-			ruGet.bind(this)('universities/' + this.ruSelectedUniversity + '/faculties', function(data) {
-				this.ruFaculties = data;
-				this.ruLoadStage = 3;
-			});
-		},
-		ruLoadGroups: function(event) {
-			ruGet.bind(this)('faculties/' + this.ruSelectedFaculty + '/groups', function(data) {
-				this.ruGroups = data;
-				this.ruLoadStage = 4;
-			});
-		},
-		ruLoadSchedule: function(event) {
-			ruGet.bind(this)('groups/' + this.ruSelectedGroup, function(data) {
-				this.schedule = convertRuSchedule(data);
-				this.backup();
-				this.ruLoadStage = 5;
-			});
-		}
 	}
 });
-
-function ruGet(url, callback) {
-	ruSpinner.spin(ruSpinnerTarget);
-	superagent.get(RU_API + url).timeout(10000).end(function(err, res) {
-		ruSpinner.stop();
-		if (err || res.error) this.ruLoadStage = -1;
-		else {
-			if (res.body.success) callback.bind(this)(res.body.data);
-			else this.ruLoadStage = -1
-		}
-	}.bind(this));
-}
-
-function convertRuSchedule(data) {
-	return data.days.map(function(day) {
-		return {
-			day: dayNames[day.weekday - 1],
-			schedule: day.lessons.map(function(lesson) {
-				var rooms = lesson.auditories.map(function(aud) { return aud.auditory_name });
-				return {
-					subj: (rooms.length > 0 ? rooms.join(',') + ' ' : '') + lesson.subject,
-					start: lesson.time_start,
-					end: lesson.time_end
-				}
-			}).sort(schedCompare)
-		}
-	});
-}
 
 function schedCompare(a, b) {
 	return (a["start"][0] * 60 + a["start"][1]) - (b["start"][0] * 60 + b["start"][1]);

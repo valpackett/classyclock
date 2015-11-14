@@ -1,0 +1,220 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tab.html">
+<link rel="import" href="../bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
+
+<script src="../bower_components/freezer-js/build/freezer.min.js"></script>
+
+<dom-module id="settings-app">
+	<style>
+		* { font-family: Roboto, Noto, sans-serif; }
+		.classy-page { width: 100%; box-sizing: border-box; padding-bottom: 3.2em; }
+		.classy-page paper-input[type="time"] { display: inline-block; vertical-align: bottom; }
+		.classy-page label { margin: 0 0.8em; }
+		.classy-page label:first-child { display: block; }
+		.classy-page label span { display: inline-block; vertical-align: 10px; line-height: 20px; margin-right: 0.5em; }
+		.classy-page paper-fab { position: fixed; bottom: 1em; right: 1em; }
+
+		.card { margin: 1em; }
+		.settings-card { padding: 0.8em; }
+		.little-help { color: #444; font-size: 0.94em; }
+
+		.entry-actions { margin: 0 0.8em 20px; text-align: right; }
+	</style>
+
+
+	<template>
+
+		<paper-header-panel class="flex">
+			<paper-toolbar id="title-bar">
+				<paper-icon-button icon="close" on-tap="openCancelDialog"></paper-icon-button>
+				<div class="title">Classy Clock</div>
+				<paper-icon-button icon="save" on-tap="save"></paper-icon-button>
+			</paper-toolbar>
+
+			<paper-toolbar id="tab-bar">
+				<paper-tabs selected="{{selectedTab}}" scrollable class="bottom flex self-end">
+					<paper-tab><iron-icon icon="settings"></iron-icon></paper-tab>
+					<template is="dom-repeat" items="[[data.schedules]]">
+						<paper-tab>[[item.day]]</paper-tab>
+					</template>
+				</paper-tabs>
+			</paper-toolbar>
+
+			<paper-dialog id="cancel-dialog" modal on-iron-overlay-closed="cancel"
+				entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+				<h2>Quit without saving?</h2>
+				<div class="buttons">
+					<paper-button dialog-dismiss>Nope</paper-button>
+					<paper-button dialog-confirm>Yeah, sure</paper-button>
+				</div>
+			</paper-dialog>
+
+			<iron-pages selected="{{selectedTab}}">
+
+				<div class="classy-page">
+					<paper-material class="card settings-card" elevation="1">
+						<h2>Backup/restore</h2>
+						<paper-textarea value="{{backupText}}"></paper-textarea>
+						<paper-button on-tap="backup">Backup</paper-button>
+						<paper-button on-tap="restore">Restore</paper-button>
+						<p class="little-help">
+							To backup: tap Backup, copy the text, paste it somewhere (in your favorite notes app).<br>
+							To restore: copy the text of your backup, paste it above, tap Restore.
+						</p>
+					</paper-material>
+					<paper-material class="card settings-card" elevation="1">
+						<h2>Import from My Class Schedule for Android</h2>
+						<form id="classschedule-import-form" action="/import/myclassschedule" method="POST" enctype="multipart/form-data">
+							<input type="file" name="database">
+							<paper-button on-tap="submitClassschedule">Import</paper-button>
+						</form>
+						<p class="little-help">
+							Make sure you have Firefox and a file manager such as Cabinet or Sliding Explorer installed on your device.<br>
+							Go to My Class Schedule &rarr; Settings &rarr; Backup / Restore &rarr; Create new backup.<br>
+							Open this settings page in Firefox (because the file picker doesn't work - it's an Android bug): <a href="[[currentUrl]]">[[currentUrl]]</a><br>
+							Tap the file chooser here, select your file manager, go to your SD Card &rarr; My Class Schedule and choose the latest backup file.
+							Tap Import. Then, make a backup, reopen this settings page in the Pebble app, paste and restore.
+						</p>
+					</paper-material>
+				</div>
+
+				<template is="dom-repeat" items="[[data.schedules]]" as="day">
+					<div class="classy-page">
+						<template is="dom-repeat" items="[[day.schedule]]" as="entry">
+							<paper-material class="card" elevation="1">
+								<label>
+									<paper-input required type="text" value="[[entry.subj]]" name="subj" on-change="fieldChange"></paper-input>
+								</label>
+								<label>
+									<span>From</span>
+									<paper-input required type="time" value="[[entry.start]]" name="start" on-change="fieldChange"></paper-input>
+								</label>
+								<label>
+									<span>To</span>
+									<paper-input required type="time" value="[[entry.end]]" name="end" on-change="fieldChange"></paper-input>
+								</label>
+								<div class="entry-actions">
+									<paper-icon-button icon="remove" title="Remove class" on-tap="removeEntry"></paper-icon-button>
+									<paper-icon-button icon="expand-less" title="Move up" on-tap="moveUpEntry"></paper-icon-button>
+									<paper-icon-button icon="expand-more" title="Move down" on-tap="moveDownEntry"></paper-icon-button>
+								</div>
+							</paper-material>
+						</template>
+						<paper-fab icon="add" title="Add class" elevation="1" on-tap="addEntry"></paper-fab>
+					</div>
+				</template>
+
+			</iron-pages>
+
+		</paper-header-panel>
+	</template>
+</dom-module>
+
+<script> 'use strict';
+	// https://developer.getpebble.com/guides/pebble-apps/pebblekit-js/app-configuration/#testing-in-the-sdk-emulator
+	function getQueryParam (variable, defaultValue) {
+		var vars = location.search.substring(1).split('&')
+		for (var i = 0; i < vars.length; i++) {
+			var pair = vars[i].split('=')
+			if (pair[0] === variable)
+				return decodeURIComponent(pair[1])
+		}
+		return defaultValue || false
+	}
+	var return_to = getQueryParam('return_to', 'pebblejs://close#')
+	var dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+	Polymer({
+		is: 'settings-app',
+		properties: {
+			selectedTab: { type: Number, value: 0 },
+			backupText: { type: String, value: '' },
+			currentUrl: { type: String, value: document.location.href.replace(/#.*/, '') },
+			data: { type: Object, value: { } },
+		},
+		attached: function() {
+			var initialSchedule
+			var hashobj
+			try { hashobj = JSON.parse(decodeURIComponent(document.location.hash.slice(1))) } catch (e) { }
+			if (Array.isArray(hashobj))
+				initialSchedule = hashobj
+			else if ((typeof hashobj === 'object') && (hashobj !== null))
+				initialSchedule = hashobj.schedules
+			else
+				initialSchedule = dayNames.map(function (dn) {
+					return { 'day': dn, 'schedule': [ {'start': '23:58', 'end': '23:59', 'subj': 'Edit schedule on phone'} ] }
+				})
+			window.store = new Freezer({ schedules: initialSchedule })
+			this.data = store.get()
+			store.on('update', function (newValue) {
+				this.data = newValue
+			}.bind(this))
+		},
+
+		openCancelDialog: function () {
+			this.$['cancel-dialog'].open()
+		},
+		cancel: function (e) {
+			if (e.target.closingReason.confirmed)
+				document.location = return_to
+		},
+		save: function (e) {
+			this.backup()
+			document.location = return_to + encodeURIComponent(this.backupText)
+		},
+
+		backup: function () {
+			this.backupText = JSON.stringify({ schedules: this.data.schedules })
+		},
+		restore: function () {
+			this.data.set('schedules', JSON.parse(this.backupText).schedules)
+		},
+		submitClassschedule: function () {
+			this.$['classschedule-import-form'].submit()
+		},
+
+		addEntry: function (e) {
+			e.model.day.schedule.push({ 'start': '00:00', 'end': '00:00', 'subj': '' })
+		},
+		removeEntry: function (e) {
+			e.model.entry.__.parents[0].splice(e.model.index, 1)
+		},
+		moveUpEntry: function (e) {
+			if (e.model.index < 1) return
+			var schedule = e.model.entry.__.parents[0]
+			var trans = schedule.transact()
+			var tmp = trans[e.model.index]
+			trans[e.model.index] = trans[e.model.index - 1]
+			trans[e.model.index - 1] = tmp
+			schedule.run()
+		},
+		moveDownEntry: function (e) {
+			var schedule = e.model.entry.__.parents[0]
+			if (e.model.index >= schedule.length - 1) return
+			var trans = schedule.transact()
+			var tmp = trans[e.model.index]
+			trans[e.model.index] = trans[e.model.index + 1]
+			trans[e.model.index + 1] = tmp
+			schedule.run()
+		},
+		fieldChange: function (e) {
+			e.model.entry.set(e.target.name, e.target.value)
+		}
+
+	});
+</script>

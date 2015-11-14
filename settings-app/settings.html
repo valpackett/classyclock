@@ -1,121 +1,14 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ratchet/2.0.2/css/ratchet.min.css">
-<script>
-	var theme = navigator.userAgent.toLowerCase().indexOf('android') > -1 ? 'android' : 'ios';
-	document.write('<li'+'nk rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ratchet/2.0.2/css/ratchet-theme-'+theme+'.min.css">');
-</script>
-<link rel="stylesheet" href="/static/settings.css">
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+		<meta name="format-detection" content="telephone=no">
+		<script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+		<link rel="import" href="elements/settings-app.html">
+	</head>
 
-<body id="events">
-	<header class="bar bar-nav">
-		<a class="icon icon-close pull-left" v-on="click: cancel"></a>
-		<a class="icon icon-check pull-right" v-on="click: save"></a>
-		<h1 class="title">Classy Clock</h1>
-	</header>
-
-	<nav class="bar bar-standard bar-header-secondary">
-		<div class="segmented-control">
-			<a class="control-item" v-repeat="days" v-class="active: this.id == currentDay.id" v-on="click: openDay(this)">
-				{{shortName}}
-			</a>
-		</div>
-	</nav>
-
-	<div class="content">
-
-		<ul class="table-view sched-list content-padded" v-repeat="schedule" v-class="hidden: this.day != currentDay.name">
-			<li v-repeat="schedule">
-				<form class="input-group">
-					<div class="input-row">
-						<label for="subject-{{$index}}">Subject</label>
-						<input id="subject-{{$index}}" type="text" maxlength="32" required v-model="subj">
-					</div>
-					<div class="input-row">
-						<label for="start-{{$index}}">Start</label>
-						<input id="start-{{$index}}" type="time" step="60" required v-model="start">
-					</div>
-					<div class="input-row">
-						<label for="end-{{$index}}">End</label>
-						<input id="end-{{$index}}" type="time" step="60" required v-model="end">
-					</div>
-				</form>
-				<div class="actionbar">
-					<a class="btn btn-block btn-schedule-action btn-negative" v-on="click: remove" data-id="{{$index}}"><span class="icon icon-trash"></span></a>
-					<a class="btn btn-block btn-schedule-action" v-on="click: moveUp" data-id="{{$index}}"><span class="icon icon-up"></span></a>
-					<a class="btn btn-block btn-schedule-action" v-on="click: moveDown" data-id="{{$index}}"><span class="icon icon-down"></span></a>
-				</div>
-			</li>
-		</ul>
-
-		<div class="bar bar-standard bar-footer">
-			<a class="icon icon-gear pull-right" v-on="click: isJSONVisible = true" v-class="hidden: isJSONVisible == true"></a>
-			<a class="icon icon-plus pull-left" v-on="click: add"></a>
-		</div>
-
-		<div class="modal" v-class="active: isJSONVisible == true">
-			<header class="bar bar-nav">
-				<a class="icon icon-close pull-left" v-on="click: isJSONVisible = false"></a>
-				<h1 class="title">Settings</h1>
-			</header>
-			<div class="content">
-				<form class="control-group content-padded" action="/import/myclassschedule" method="POST" enctype="multipart/form-data">
-					<h3>Backup or Restore</h3>
-					<textarea rows="5" v-model="json"></textarea>
-					<a class="btn" v-on="click: backup">Backup</a>
-					<a class="btn" v-on="click: restore">Restore</a>
-					<p class="little-help">
-						To backup: tap Backup, copy the text, paste it somewhere (in your favorite notes app).<br>
-						To restore: copy the text of your backup, paste it above, tap Restore.
-					</p>
-					<h3>Import from My Class Schedule</h3>
-					<p class="little-help">
-						Make sure you have Firefox and a file manager such as Cabinet or Sliding Explorer installed on your device.<br>
-						Go to My Class Schedule &rarr; Settings &rarr; Backup / Restore &rarr; Create new backup.<br>
-						Open this settings page in Firefox (because the file picker doesn't work - it's an Android bug): <a href="https://classyclock.herokuapp.com/">https://classyclock.herokuapp.com</a><br>
-						Tap the file chooser here, select your file manager, go to your SD Card &rarr; My Class Schedule and choose the latest backup file.
-						Tap Import. Then, make a backup, reopen this settings page in the Pebble app, paste and restore.
-					</p>
-					<p>
-						<input type="file" name="database">
-						<button type="submit" class="btn">Import</button>
-					</p>
-					<h3>Import from raspisaniye-vuzov.ru</h3>
-					<p class="little-help">
-						<a class="btn" v-on="click: ruLoadCities" v-class="hidden: ruLoadStage > 0">Start</a>
-						<select v-model="ruSelectedCity" v-class="hidden: ruLoadStage < 1" v-on="change: ruLoadUniversities">
-							<option v-repeat="ruCities" value="{{id}}">{{title}} / {{country}}</option>
-						</select>
-						<select v-model="ruSelectedUniversity" v-class="hidden: ruLoadStage < 2" v-on="change: ruLoadFaculties">
-							<option selected>Choose a university</option>
-							<option v-repeat="ruUniversities" value="{{id}}">{{shortTitle}} ({{title}})</option>
-						</select>
-						<select v-model="ruSelectedFaculty" v-class="hidden: ruLoadStage < 3" v-on="change: ruLoadGroups">
-							<option selected>Choose a faculty</option>
-							<option v-repeat="ruFaculties" value="{{id}}">{{title}}</option>
-						</select>
-						<select v-model="ruSelectedGroup" v-class="hidden: ruLoadStage < 4" v-on="change: ruLoadSchedule">
-							<option selected>Choose a group</option>
-							<option v-repeat="ruGroups" value="{{id}}">{{title}}</option>
-						</select>
-						<div v-class="hidden: ruLoadStage != -1">
-							Loading error :-(
-						</div>
-						<div v-class="hidden: ruLoadStage != 5">
-							Successfully imported!
-						</div>
-						<div id="ru-spinner"></div>
-					</p>
-				</form>
-			</div>
-		</div>
-
-	</div>
-
-
-	<script src="//cdnjs.cloudflare.com/ajax/libs/vue/0.10.6/vue.min.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/superagent/0.15.7/superagent.min.js"></script>
-	<script src="/static/settings.js"></script>
-</body>
+	<body unresolved class="fullbleed">
+		<settings-app></settings-app>
+	</body>
+</html>

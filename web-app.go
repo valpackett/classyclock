@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"os"
 	"strings"
@@ -16,34 +15,22 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// NOTE: designed to run with a /classyclock prefix, which must be stripped by the server
+
 func main() {
 	var port = os.Getenv("PORT")
-	var settingsHtml []byte
-	settingsHtml, err := ioutil.ReadFile("./settings-app/settings.html")
-	if err != nil {
-		panic(err)
-	}
-	var hh = makeHtmlHandler(settingsHtml)
-	http.HandleFunc("/", hh)
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./settings-app/"))))
-	http.Handle("/ru/", http.StripPrefix("/ru", httputil.NewSingleHostReverseProxy(&url.URL{Scheme: "https", Host: "raspisaniye-vuzov.ru"})))
 	http.HandleFunc("/import/myclassschedule", mcsImportHandler)
 	fmt.Println("Server started on port " + port)
-	err = http.ListenAndServe(":"+port, nil)
+	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		panic(err)
-	}
-}
-
-func makeHtmlHandler(html []byte) func(res http.ResponseWriter, req *http.Request) {
-	return func(res http.ResponseWriter, req *http.Request) {
-		res.Write(html)
 	}
 }
 
 type Class struct {
-	Start []int  `json:"start"`
-	End   []int  `json:"end"`
+	Start string `json:"start"`
+	End   string `json:"end"`
 	Subj  string `json:"subj"`
 }
 
@@ -75,8 +62,8 @@ func mcsImportHandler(res http.ResponseWriter, req *http.Request) {
 		var from_time, to_time, monday, tuesday, wednesday, thursday, friday, saturday, sunday int
 		var name string
 		rows.Scan(&from_time, &to_time, &monday, &tuesday, &wednesday, &thursday, &friday, &saturday, &sunday, &name)
-		start := []int{from_time / 60, from_time % 60}
-		end := []int{to_time / 60, to_time % 60}
+		start := fmt.Sprintf("%02d:%02d", from_time/60, from_time%60)
+		end := fmt.Sprintf("%02d:%02d", to_time/60, to_time%60)
 		class := Class{start, end, name}
 		if monday == 1 {
 			mon.Schedule = append(mon.Schedule, class)
@@ -108,6 +95,6 @@ func mcsImportHandler(res http.ResponseWriter, req *http.Request) {
 	} else {
 		scheme = "https"
 	}
-	res.Header().Set("Location", fmt.Sprintf("%s://%s/#%s", scheme, req.Host, url.QueryEscape(string(jsonBytes))))
+	res.Header().Set("Location", fmt.Sprintf("%s://%s/classyclock/static/settings.html#%s", scheme, req.Host, url.QueryEscape(string(jsonBytes))))
 	res.WriteHeader(http.StatusFound)
 }
