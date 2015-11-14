@@ -150,7 +150,7 @@
 		attached: function() {
 			var initialSchedule
 			var hashobj
-			try { hashobj = JSON.parse(decodeURIComponent(document.location.hash.slice(1))) } catch (e) { }
+			try { hashobj = JSON.parse(decodeURIComponent(document.location.hash.slice(1).replace(/\+/g, ' '))) } catch (e) { }
 			if (Array.isArray(hashobj))
 				initialSchedule = hashobj
 			else if ((typeof hashobj === 'object') && (hashobj !== null))
