@@ -1,3 +1,4 @@
 /pebble-app/build
 /pebble-app/.lock-waf*
 /settings-app/bower_components
+/classyclock
