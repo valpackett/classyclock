@@ -22,7 +22,7 @@ function serializeSchedule (flat_schedule) {
 	var result = {}
 	var ctr = 1
 	flat_schedule.forEach(function (entry) {
-		result[String(ctr)] = entry.start + entry.end + entry.subj
+		result[String(ctr)] = entry.start.replace(':', '').slice(0, 4) + entry.end.replace(':', '').slice(0, 4) + entry.subj
 		ctr += 1
 	})
 	console.log('Serialized schedule: ' + JSON.stringify(result))
