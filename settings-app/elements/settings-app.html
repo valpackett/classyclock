@@ -20,9 +20,9 @@
 <script src="../bower_components/freezer-js/build/freezer.min.js"></script>
 
 <dom-module id="settings-app">
+	<link rel="import" type="css" href="../theme.css">
 	<style>
-		* { font-family: Roboto, Noto, sans-serif; }
-		.classy-page { width: 100%; box-sizing: border-box; padding-bottom: 3.2em; }
+		.classy-page { width: 100%; box-sizing: border-box; padding-bottom: 3.2em; max-width: 1024px; margin: 0 auto; }
 		.classy-page paper-input[type="time"] { display: inline-block; vertical-align: bottom; }
 		.classy-page label { margin: 0 0.8em; }
 		.classy-page label:first-child { display: block; }
@@ -48,7 +48,7 @@
 
 			<paper-toolbar id="tab-bar">
 				<paper-tabs selected="{{selectedTab}}" scrollable class="bottom flex self-end">
-					<paper-tab><iron-icon icon="settings"></iron-icon></paper-tab>
+					<paper-tab>&nbsp;<iron-icon icon="settings"></iron-icon>&nbsp;</paper-tab> <!-- Webkit/Blink acts weirdly w/o nbsp -->
 					<template is="dom-repeat" items="[[data.schedules]]">
 						<paper-tab>[[item.day]]</paper-tab>
 					</template>
@@ -144,7 +144,7 @@
 		properties: {
 			selectedTab: { type: Number, value: 0 },
 			backupText: { type: String, value: '' },
-			currentUrl: { type: String, value: document.location.href.replace(/#.*/, '') },
+			currentUrl: { type: String, value: document.location.href.replace(/[#?].*/, '') },
 			data: { type: Object, value: { } },
 		},
 		attached: function() {
