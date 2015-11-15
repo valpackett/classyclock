@@ -1,5 +1,5 @@
 var SETTINGS_URL = 'https://unrelenting.technology/classyclock/static/settings.html'
-SETTINGS_URL = 'http://192.168.1.3:4343/static/settings.html'
+//SETTINGS_URL = 'http://192.168.1.3:4343/static/settings.html'
 
 var days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 var defaultSchedules = days.map(function (dn) {
