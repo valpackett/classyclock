@@ -26,7 +26,7 @@ enum {
 
 static void set_schedule_entry(uint8_t j, uint16_t minutes, char *subject) {
   schedule[j].is_nothing = false;
-  classy_strlcpy(schedule[j].verb, j % 2 == 0 ? "begins" : "ends", VERB_LENGTH);
+  classy_strlcpy(schedule[j].verb, j % 2 == 0 ? "Begins" : "Ends", VERB_LENGTH);
   schedule[j].minutes = minutes;
   classy_strlcpy(schedule[j].subject, subject, SUBJECT_LENGTH);
 }

@@ -4,18 +4,12 @@
 #include "data.c"
 #include "util.h"
 
-#define LINE_LENGTH_UTF 22
-#define LINE_LENGTH SUBJECT_LENGTH/2 + 1
-
 static Window *window;
 static TextLayer *tl_current_time;
 static TextLayer *tl_current_date;
-static TextLayer *tl_next_class_subject_1;
-static TextLayer *tl_next_class_subject_2;
+static TextLayer *tl_next_class_subject;
 static TextLayer *tl_next_class_time;
 static char subject[SUBJECT_LENGTH];
-static char subject_line_1[LINE_LENGTH];
-static char subject_line_2[LINE_LENGTH];
 
 static TextLayer* text_layer_create_default(GRect rect) {
   TextLayer *tl = text_layer_create(rect);
@@ -38,34 +32,26 @@ static void handle_window_load(Window *window) {
   text_layer_set_font(tl_current_date, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SIGNIKA_21)));
   layer_add_child(window_layer, text_layer_get_layer(tl_current_date));
 
-  tl_next_class_subject_1 = text_layer_create_default((GRect) { .origin = { 0, 90 }, .size = { bounds.size.w, 25 } });
-  layer_add_child(window_layer, text_layer_get_layer(tl_next_class_subject_1));
-
-  tl_next_class_subject_2 = text_layer_create_default((GRect) { .origin = { 0, 108 }, .size = { bounds.size.w, 25 } });
-  layer_add_child(window_layer, text_layer_get_layer(tl_next_class_subject_2));
-
-  tl_next_class_time = text_layer_create_default((GRect) { .origin = { 0, 128 }, .size = { bounds.size.w, 25 } });
+  tl_next_class_time = text_layer_create_default((GRect) { .origin = { 0, 89 }, .size = { bounds.size.w, 18 } });
   layer_add_child(window_layer, text_layer_get_layer(tl_next_class_time));
+
+  tl_next_class_subject = text_layer_create_default((GRect) { .origin = { 0, 108 }, .size = { bounds.size.w, bounds.size.h - 105 } });
+  text_layer_set_overflow_mode(tl_next_class_subject, GTextOverflowModeWordWrap);
+  layer_add_child(window_layer, text_layer_get_layer(tl_next_class_subject));
+#ifdef PBL_ROUND
+  text_layer_enable_screen_text_flow_and_paging(tl_next_class_subject, 2);
+#endif
 }
 
 static void handle_window_unload(Window *window) {
   text_layer_destroy(tl_current_time);
   text_layer_destroy(tl_current_date);
-  text_layer_destroy(tl_next_class_subject_1);
-  text_layer_destroy(tl_next_class_subject_2);
+  text_layer_destroy(tl_next_class_subject);
   text_layer_destroy(tl_next_class_time);
 }
 
 static void set_class_text(char* subject, char* time) {
-  if (classy_utflen(subject) <= LINE_LENGTH_UTF) {
-    text_layer_set_text(tl_next_class_subject_1, "");
-    text_layer_set_text(tl_next_class_subject_2, subject);
-  } else {
-    size_t copied = classy_utfcpy(subject_line_1, subject, LINE_LENGTH_UTF, LINE_LENGTH);
-    classy_utfcpy(subject_line_2, subject + copied, LINE_LENGTH_UTF, LINE_LENGTH);
-    text_layer_set_text(tl_next_class_subject_1, subject_line_1);
-    text_layer_set_text(tl_next_class_subject_2, subject_line_2);
-  }
+  text_layer_set_text(tl_next_class_subject, subject);
   text_layer_set_text(tl_next_class_time, time);
 }
 
