@@ -59,9 +59,9 @@ static void update_next_class_time(struct tm *tick_time) {
   uint16_t current_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
   ClassEvent event = data_next_class_event(current_minutes);
   if (tick_time->tm_wday != schedule_weekday) {
-    set_class_text("Connect phone", "& wait to update.");
+    set_class_text("", "Connect your phone & wait to update.");
   } else if (event.is_nothing) {
-    set_class_text("No more classes.", "See you tomorrow.");
+    set_class_text("", "No more classes. See you tomorrow.");
   } else {
     int16_t next_class_minutes_left = event.minutes - current_minutes;
     strncpy(subject, event.subject, SUBJECT_LENGTH);
