@@ -76,11 +76,6 @@
         "type": "font",
         "name": "FONT_SIGNIKA_21",
         "file": "fonts/Signika-Regular.ttf"
-      },
-      {
-        "type": "font",
-        "name": "FONT_SIGNIKA_18",
-        "file": "fonts/Signika-Regular.ttf"
       }
     ]
   }

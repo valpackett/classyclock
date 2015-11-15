@@ -2,19 +2,27 @@
 #include <stdbool.h>
 #include "text.c"
 #include "data.c"
+#include "util.h"
+
+#define LINE_LENGTH_UTF 22
+#define LINE_LENGTH SUBJECT_LENGTH/2 + 1
 
 static Window *window;
 static TextLayer *tl_current_time;
 static TextLayer *tl_current_date;
-static TextLayer *tl_next_class_subject;
+static TextLayer *tl_next_class_subject_1;
+static TextLayer *tl_next_class_subject_2;
 static TextLayer *tl_next_class_time;
+static char subject[SUBJECT_LENGTH];
+static char subject_line_1[LINE_LENGTH];
+static char subject_line_2[LINE_LENGTH];
 
 static TextLayer* text_layer_create_default(GRect rect) {
   TextLayer *tl = text_layer_create(rect);
   text_layer_set_text_alignment(tl, GTextAlignmentCenter);
   text_layer_set_background_color(tl, GColorBlack);
   text_layer_set_text_color(tl, GColorWhite);
-  /* text_layer_set_font(tl, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SIGNIKA_18))); */
+  text_layer_set_font(tl, fonts_get_system_font(FONT_KEY_GOTHIC_14));
   return tl;
 }
 
@@ -30,22 +38,34 @@ static void handle_window_load(Window *window) {
   text_layer_set_font(tl_current_date, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SIGNIKA_21)));
   layer_add_child(window_layer, text_layer_get_layer(tl_current_date));
 
-  tl_next_class_subject = text_layer_create_default((GRect) { .origin = { 0, 100 }, .size = { bounds.size.w, 25 } });
-  layer_add_child(window_layer, text_layer_get_layer(tl_next_class_subject));
+  tl_next_class_subject_1 = text_layer_create_default((GRect) { .origin = { 0, 90 }, .size = { bounds.size.w, 25 } });
+  layer_add_child(window_layer, text_layer_get_layer(tl_next_class_subject_1));
 
-  tl_next_class_time = text_layer_create_default((GRect) { .origin = { 0, 124 }, .size = { bounds.size.w, 25 } });
+  tl_next_class_subject_2 = text_layer_create_default((GRect) { .origin = { 0, 108 }, .size = { bounds.size.w, 25 } });
+  layer_add_child(window_layer, text_layer_get_layer(tl_next_class_subject_2));
+
+  tl_next_class_time = text_layer_create_default((GRect) { .origin = { 0, 128 }, .size = { bounds.size.w, 25 } });
   layer_add_child(window_layer, text_layer_get_layer(tl_next_class_time));
 }
 
 static void handle_window_unload(Window *window) {
   text_layer_destroy(tl_current_time);
   text_layer_destroy(tl_current_date);
-  text_layer_destroy(tl_next_class_subject);
+  text_layer_destroy(tl_next_class_subject_1);
+  text_layer_destroy(tl_next_class_subject_2);
   text_layer_destroy(tl_next_class_time);
 }
 
 static void set_class_text(char* subject, char* time) {
-  text_layer_set_text(tl_next_class_subject, subject);
+  if (classy_utflen(subject) <= LINE_LENGTH_UTF) {
+    text_layer_set_text(tl_next_class_subject_1, "");
+    text_layer_set_text(tl_next_class_subject_2, subject);
+  } else {
+    size_t copied = classy_utfcpy(subject_line_1, subject, LINE_LENGTH_UTF, LINE_LENGTH);
+    classy_utfcpy(subject_line_2, subject + copied, LINE_LENGTH_UTF, LINE_LENGTH);
+    text_layer_set_text(tl_next_class_subject_1, subject_line_1);
+    text_layer_set_text(tl_next_class_subject_2, subject_line_2);
+  }
   text_layer_set_text(tl_next_class_time, time);
 }
 
@@ -58,8 +78,7 @@ static void update_next_class_time(struct tm *tick_time) {
     set_class_text("No more classes.", "See you tomorrow.");
   } else {
     int16_t next_class_minutes_left = event.minutes - current_minutes;
-    static char *subject = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // fucking cstrings
-    fucking_copy_string(subject, event.subject, SUBJECT_LENGTH); // i can't even
+    strncpy(subject, event.subject, SUBJECT_LENGTH);
     set_class_text(subject, format_next_class_time(next_class_minutes_left, event.verb));
   }
 }
@@ -67,7 +86,8 @@ static void update_next_class_time(struct tm *tick_time) {
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
   text_layer_set_text(tl_current_time, format_time(tick_time));
   text_layer_set_text(tl_current_date, format_date(tick_time));
-  if (tick_time->tm_wday != schedule_weekday) data_request_from_phone();
+  if (tick_time->tm_wday != schedule_weekday)
+    data_request_from_phone();
   update_next_class_time(tick_time);
 }
 

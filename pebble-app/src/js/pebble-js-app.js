@@ -10,19 +10,28 @@ function getSchedules () {
 }
 
 function getScheduleForToday () {
-	var today = days[new Date().getDay() - 1]
-	return getSchedules().filter(function (s) { return s.day == today })[0].schedule
+	// Why the hell is "sunday is the first day" even a thing
+	var dayNumber = new Date().getDay() - 1
+	var today = days[dayNumber == -1 ? days.length - 1 : dayNumber]
+	return (getSchedules().filter(function (s) { return s.day == today })[0] || { schedule: [] }).schedule
 }
 
 function setSchedules (s) {
 	return localStorage.setItem('schedules', JSON.stringify({ schedules: s }))
 }
 
+function formatTime (t) {
+	// The Pebble app needs a zero-padded number of minutes
+	var parts = t.split(':')
+	var padded = ('0000' + String(parseInt(parts[0]) * 60 + parseInt(parts[1])))
+	return padded.slice(padded.length - 4, padded.length)
+}
+
 function serializeSchedule (flat_schedule) {
 	var result = {}
 	var ctr = 1
 	flat_schedule.forEach(function (entry) {
-		result[String(ctr)] = entry.start.replace(':', '').slice(0, 4) + entry.end.replace(':', '').slice(0, 4) + entry.subj.slice(0, 31)
+		result[String(ctr)] = formatTime(entry.start) + formatTime(entry.end) + entry.subj.slice(0, 128)
 		ctr += 1
 	})
 	console.log('Serialized schedule: ' + JSON.stringify(result))

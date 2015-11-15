@@ -1,13 +1,13 @@
 #include <pebble.h>
 #include <stdbool.h>
 #include <limits.h>
-#include "util.c"
+#include "util.h"
 
-#define SCHED_LENGTH 40
-// 40 = 20 beginnings + 20 endings
-// I hope nobody actually has more than 20 classes per day
+#define SCHED_LENGTH 36
+// 36 = 18 beginnings + 18 endings
+// I hope nobody actually has this much classes per day
 
-#define SUBJECT_LENGTH 32
+#define SUBJECT_LENGTH 128
 #define VERB_LENGTH 7
 
 typedef struct {
@@ -26,30 +26,28 @@ enum {
 
 static void set_schedule_entry(uint8_t j, uint16_t minutes, char *subject) {
   schedule[j].is_nothing = false;
-  fucking_copy_string(schedule[j].verb, j % 2 == 0 ? "begins" : "ends", VERB_LENGTH);
+  classy_strlcpy(schedule[j].verb, j % 2 == 0 ? "begins" : "ends", VERB_LENGTH);
   schedule[j].minutes = minutes;
-  fucking_copy_string(schedule[j].subject, subject, SUBJECT_LENGTH);
+  classy_strlcpy(schedule[j].subject, subject, SUBJECT_LENGTH);
 }
 
 static void data_persist() {
   persist_write_int(INT_MAX, schedule_weekday);
-  for (uint8_t i = 0; i < SCHED_LENGTH; i++) {
+  for (uint8_t i = 0; i < SCHED_LENGTH; i++)
     persist_write_data(i, &schedule[i], sizeof(schedule[i]));
-  }
 }
 
 static void data_read_persisted() {
-  if (persist_exists(INT_MAX)) {
+  if (persist_exists(INT_MAX))
     schedule_weekday = persist_read_int(INT_MAX);
-  }
-  for (uint8_t i = 0; i < SCHED_LENGTH; i++) {
-    if (persist_exists(i)) persist_read_data(i, &schedule[i], sizeof(schedule[i]));
-  }
+  for (uint8_t i = 0; i < SCHED_LENGTH; i++)
+    if (persist_exists(i))
+      persist_read_data(i, &schedule[i], sizeof(schedule[i]));
 }
 
 static uint16_t extract_number(char *s, uint8_t from, uint8_t len) {
-  char buf[len]; // I don't have any fucking idea why adding +1 for the \0 fucks everything up
-  strncpy(buf, s + from, len);
+  char buf[len + 1];
+  classy_strlcpy(buf, s + from, len + 1);
   return atoi(buf);
 }
 
@@ -69,9 +67,9 @@ static void data_set_from_dict(DictionaryIterator* iter, struct tm *cur_time) {
 }
 
 static ClassEvent data_next_class_event(uint16_t current_minutes) {
-  for (uint8_t i = 0; i < SCHED_LENGTH; i++) {
-    if (schedule[i].minutes > current_minutes) return schedule[i];
-  }
+  for (uint8_t i = 0; i < SCHED_LENGTH; i++)
+    if (schedule[i].minutes > current_minutes)
+      return schedule[i];
   return (ClassEvent) { .is_nothing = true, .minutes = 0, .subject = "Updating", .verb = "begins" };
 }
 
