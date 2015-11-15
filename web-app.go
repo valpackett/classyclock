@@ -16,8 +16,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// NOTE: designed to run with a /classyclock prefix, which must be stripped by the server
-
 func main() {
 	var port = os.Getenv("PORT")
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./settings-app/"))))
@@ -44,12 +42,12 @@ type Day struct {
 func respondWithSchedule(res http.ResponseWriter, req *http.Request, days []Day) {
 	jsonBytes, _ := json.Marshal(days)
 	var scheme string
-	if strings.Contains(req.Host, "localhost") {
+	if strings.Contains(req.Host, "localhost") || strings.Contains(req.Host, "192.168") {
 		scheme = "http"
 	} else {
 		scheme = "https"
 	}
-	res.Header().Set("Location", fmt.Sprintf("%s://%s/classyclock/static/settings.html#%s", scheme, req.Host, url.QueryEscape(string(jsonBytes))))
+	res.Header().Set("Location", fmt.Sprintf("%s://%s%s/static/settings.html#%s", scheme, req.Host, os.Getenv("URL_PREFIX"), url.QueryEscape(string(jsonBytes))))
 	res.WriteHeader(http.StatusFound)
 }
 

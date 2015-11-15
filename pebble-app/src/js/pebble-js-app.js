@@ -1,3 +1,6 @@
+var SETTINGS_URL = 'https://unrelenting.technology/classyclock/static/settings.html'
+SETTINGS_URL = 'http://192.168.1.3:4343/static/settings.html'
+
 var days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 var defaultSchedules = days.map(function (dn) {
 	return { 'day': dn, 'schedule': [ { 'start': '23:58', 'end': '23:59', 'subj': 'Edit schedule on phone' } ] }
@@ -34,13 +37,19 @@ function serializeSchedule (flat_schedule) {
 		result[String(ctr)] = formatTime(entry.start) + formatTime(entry.end) + entry.subj.slice(0, 160)
 		ctr += 1
 	})
-	console.log('Serialized schedule: ' + JSON.stringify(result))
 	return result
+}
+
+function addSettings (message) {
+	var INT_MAX = 2147483647
+	message[String(INT_MAX - 1)] = parseInt(localStorage.getItem('vibrateMinutes') || 1)
+	console.log('Message: ' + JSON.stringify(message))
+	return message
 }
 
 function sendNextEvent () {
 	Pebble.sendAppMessage(
-		serializeSchedule(getScheduleForToday()),
+		addSettings(serializeSchedule(getScheduleForToday())),
 		function (e) {
 			console.log('Successfully delivered message with transactionId=' + e.data.transactionId)
 		},
@@ -61,13 +70,18 @@ Pebble.addEventListener('appmessage', function (e) {
 })
 
 Pebble.addEventListener('showConfiguration', function (e) {
-	Pebble.openURL('https://unrelenting.technology/classyclock/static/settings.html#' + encodeURIComponent(JSON.stringify({'schedules': getSchedules()})))
+
+	Pebble.openURL(SETTINGS_URL + '#' + encodeURIComponent(JSON.stringify({
+		schedules: getSchedules(),
+		vibrateMinutes: localStorage.getItem('vibrateMinutes')
+	})))
 })
 
 Pebble.addEventListener('webviewclosed', function (e) {
 	var rsp = JSON.parse(decodeURIComponent(e.response))
 	if (typeof rsp === 'object') {
 		setSchedules(rsp.schedules)
+		localStorage.setItem('vibrateMinutes', rsp.vibrateMinutes)
 		sendNextEvent()
 	}
 })

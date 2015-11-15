@@ -23,10 +23,10 @@
 	<link rel="import" type="css" href="../theme.css">
 	<style>
 		.classy-page { width: 100%; box-sizing: border-box; padding-bottom: 3.2em; max-width: 1024px; margin: 0 auto; }
-		.classy-page paper-input[type="time"] { display: inline-block; vertical-align: bottom; }
-		.classy-page label { margin: 0 0.8em; }
 		.classy-page label:first-child { display: block; }
-		.classy-page label span { display: inline-block; vertical-align: 10px; line-height: 20px; margin-right: 0.5em; }
+		.input-label { margin: 0 0.8em; }
+		.input-label span { display: inline-block; vertical-align: 10px; line-height: 20px; margin-right: 0.5em; }
+		.labelled-input { display: inline-block; vertical-align: bottom; }
 		.classy-page paper-fab { position: fixed; bottom: 1em; right: 1em; }
 
 		.card { margin: 1em; }
@@ -68,6 +68,14 @@
 
 				<div class="classy-page">
 					<paper-material class="card settings-card" elevation="1">
+						<h2>Settings</h2>
+						<label class="input-label">
+							<span>Vibrate</span>
+							<paper-input class="labelled-input" required type="number" value="{{vibrateMinutes}}"></paper-input>
+							<span>minutes before a class begins/ends</span>
+						</label>
+					</paper-material>
+					<paper-material class="card settings-card" elevation="1">
 						<h2>Backup/restore</h2>
 						<paper-textarea value="{{backupText}}"></paper-textarea>
 						<paper-button on-tap="backup">Backup</paper-button>
@@ -79,7 +87,7 @@
 					</paper-material>
 					<paper-material class="card settings-card" elevation="1">
 						<h2>Import from My Class Schedule for Android</h2>
-						<form id="classschedule-import-form" action="/classyclock/import/myclassschedule" method="POST" enctype="multipart/form-data">
+						<form id="classschedule-import-form" action="../../import/myclassschedule" method="POST" enctype="multipart/form-data">
 							<input type="file" name="database">
 							<paper-button on-tap="submitClassschedule">Import</paper-button>
 						</form>
@@ -93,8 +101,8 @@
 					</paper-material>
 					<paper-material class="card settings-card" elevation="1">
 						<h2>Import from ruz.hse.ru</h2>
-						<form id="ruz-import-form" action="/classyclock/import/ruz" method="GET">
-							<label>
+						<form id="ruz-import-form" action="../../import/ruz" method="GET">
+							<label class="input-label">
 								edu email:
 								<paper-input type="email" name="email" value="{{ruzEmail}}"></paper-input>
 							</label>
@@ -107,16 +115,16 @@
 					<div class="classy-page">
 						<template is="dom-repeat" items="[[day.schedule]]" as="entry">
 							<paper-material class="card" elevation="1">
-								<label>
+								<label class="input-label">
 									<paper-input required type="text" value="[[entry.subj]]" name="subj" on-change="fieldChange"></paper-input>
 								</label>
-								<label>
+								<label class="input-label">
 									<span>From</span>
-									<paper-input required type="time" value="[[entry.start]]" name="start" on-change="fieldChange"></paper-input>
+									<paper-input class="labelled-input" required type="time" value="[[entry.start]]" name="start" on-change="fieldChange"></paper-input>
 								</label>
-								<label>
+								<label class="input-label">
 									<span>To</span>
-									<paper-input required type="time" value="[[entry.end]]" name="end" on-change="fieldChange"></paper-input>
+									<paper-input class="labelled-input" required type="time" value="[[entry.end]]" name="end" on-change="fieldChange"></paper-input>
 								</label>
 								<div class="entry-actions">
 									<paper-icon-button icon="remove" title="Remove class" on-tap="removeEntry"></paper-icon-button>
@@ -153,6 +161,7 @@
 		is: 'settings-app',
 		properties: {
 			selectedTab: { type: Number, value: 0 },
+			vibrateMinutes: { type: Number, value: parseInt(localStorage.getItem('vibrateMinutes') || 1) },
 			backupText: { type: String, value: '' },
 			ruzEmail: { type: String, value: localStorage.getItem('ruzEmail') || '' },
 			currentUrl: { type: String, value: document.location.href.replace(/[#?].*/, '') },
@@ -162,14 +171,16 @@
 			var initialSchedule
 			var hashobj
 			try { hashobj = JSON.parse(decodeURIComponent(document.location.hash.slice(1).replace(/\+/g, ' '))) } catch (e) { }
-			if (Array.isArray(hashobj))
+			if (Array.isArray(hashobj)) {
 				initialSchedule = hashobj
-			else if ((typeof hashobj === 'object') && (hashobj !== null))
+			} else if ((typeof hashobj === 'object') && (hashobj !== null)) {
 				initialSchedule = hashobj.schedules
-			else
+				this.vibrateMinutes = hashobj.vibrateMinutes || this.vibrateMinutes
+			} else {
 				initialSchedule = dayNames.map(function (dn) {
 					return { 'day': dn, 'schedule': [ {'start': '23:58', 'end': '23:59', 'subj': 'Edit schedule on phone'} ] }
 				})
+			}
 			window.store = new Freezer({ schedules: initialSchedule })
 			this.data = store.get()
 			store.on('update', function (newValue) {
@@ -193,7 +204,8 @@
 		},
 
 		backup: function () {
-			this.backupText = JSON.stringify({ schedules: this.data.schedules })
+			this.backupText = JSON.stringify({ schedules: this.data.schedules, vibrateMinutes: this.vibrateMinutes })
+			localStorage.setItem('vibrateMinutes', this.vibrateMinutes)
 		},
 		restore: function () {
 			this.data.set('schedules', JSON.parse(this.backupText).schedules)

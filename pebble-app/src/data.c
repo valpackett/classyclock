@@ -10,6 +10,11 @@
 #define SUBJECT_LENGTH 160
 #define VERB_LENGTH 7 // "Begins\0
 
+// The keys at the beginning of the keyspace (0, 1...) are the stored schedule
+// Same keys for storage and incoming message
+#define KEY_WEEKDAY INT_MAX
+#define KEY_VIBRATE_MINUTES INT_MAX-1
+
 typedef struct {
 	uint16_t minutes;
 	bool is_nothing;
@@ -19,6 +24,7 @@ typedef struct {
 
 static ClassEvent schedule[SCHED_LENGTH];
 static uint8_t schedule_weekday;
+static uint8_t vibrate_minutes = 1;
 
 enum {
 	MSG_KEY_GET = 0x0
@@ -32,14 +38,17 @@ static void set_schedule_entry(uint8_t j, uint16_t minutes, char *subject) {
 }
 
 static void data_persist() {
-	persist_write_int(INT_MAX, schedule_weekday);
+	persist_write_int(KEY_WEEKDAY, schedule_weekday);
+	persist_write_int(KEY_VIBRATE_MINUTES, vibrate_minutes);
 	for (uint8_t i = 0; i < SCHED_LENGTH; i++)
 		persist_write_data(i, &schedule[i], sizeof(schedule[i]));
 }
 
 static void data_read_persisted() {
-	if (persist_exists(INT_MAX))
-		schedule_weekday = persist_read_int(INT_MAX);
+	if (persist_exists(KEY_WEEKDAY))
+		schedule_weekday = persist_read_int(KEY_WEEKDAY);
+	if (persist_read_int(KEY_VIBRATE_MINUTES))
+		vibrate_minutes = persist_read_int(KEY_VIBRATE_MINUTES);
 	for (uint8_t i = 0; i < SCHED_LENGTH; i++)
 		if (persist_exists(i))
 			persist_read_data(i, &schedule[i], sizeof(schedule[i]));
@@ -63,10 +72,13 @@ static void data_set_from_dict(DictionaryIterator* iter, struct tm *cur_time) {
 		}
 		j++;
 	}
+	Tuple *vib = dict_find(iter, KEY_VIBRATE_MINUTES);
+	if (vib)
+		vibrate_minutes = (uint8_t)vib->value->int32;
 	data_persist();
 }
 
-static ClassEvent data_next_class_event(uint16_t current_minutes) {
+static ClassEvent data_next_event(uint16_t current_minutes) {
 	for (uint8_t i = 0; i < SCHED_LENGTH; i++)
 		if (schedule[i].minutes > current_minutes)
 			return schedule[i];

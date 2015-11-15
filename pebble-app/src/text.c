@@ -24,7 +24,7 @@ static char* format_date(struct tm *tick_time) {
 	return date_text;
 }
 
-static char* format_next_class_time(int next_class_minutes_left, char* next_class_verb) {
+static char* format_next_event_time(int next_class_minutes_left, char* next_class_verb) {
 	static char next_class_time[NEXT_CLASS_TIME_SIZE];
 	if (next_class_minutes_left > 60) {
 		snprintf(next_class_time, NEXT_CLASS_TIME_SIZE, "%s in %dh%dm:", next_class_verb, next_class_minutes_left / 60, next_class_minutes_left % 60);
