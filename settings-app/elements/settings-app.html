@@ -186,7 +186,10 @@
 		},
 		save: function (e) {
 			this.backup()
-			document.location = return_to + encodeURIComponent(this.backupText)
+			// Wait in case an input is still focused (on touch webkit) and its contents aren't saved yet
+			setTimeout(function () {
+				document.location = return_to + encodeURIComponent(this.backupText)
+			}.bind(this), 350)
 		},
 
 		backup: function () {
