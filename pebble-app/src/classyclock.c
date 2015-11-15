@@ -50,9 +50,9 @@ static void handle_window_unload(Window *window) {
   text_layer_destroy(tl_next_class_time);
 }
 
-static void set_class_text(char* subject, char* time) {
-  text_layer_set_text(tl_next_class_subject, subject);
+static void set_class_text(char* time, char* subject) {
   text_layer_set_text(tl_next_class_time, time);
+  text_layer_set_text(tl_next_class_subject, subject);
 }
 
 static void update_next_class_time(struct tm *tick_time) {
@@ -65,7 +65,7 @@ static void update_next_class_time(struct tm *tick_time) {
   } else {
     int16_t next_class_minutes_left = event.minutes - current_minutes;
     strncpy(subject, event.subject, SUBJECT_LENGTH);
-    set_class_text(subject, format_next_class_time(next_class_minutes_left, event.verb));
+    set_class_text(format_next_class_time(next_class_minutes_left, event.verb), subject);
   }
 }
 

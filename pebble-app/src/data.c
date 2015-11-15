@@ -7,8 +7,8 @@
 // 36 = 18 beginnings + 18 endings
 // I hope nobody actually has this much classes per day
 
-#define SUBJECT_LENGTH 128
-#define VERB_LENGTH 7
+#define SUBJECT_LENGTH 160
+#define VERB_LENGTH 7 // "Begins\0
 
 typedef struct {
   uint16_t minutes;
