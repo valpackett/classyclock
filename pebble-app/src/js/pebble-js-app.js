@@ -59,21 +59,70 @@ function sendNextEvent () {
 	)
 }
 
+function storageGetBool (key) {
+	try { return JSON.parse(localStorage.getItem(key)) == true } catch (e) { return false }
+}
+
+function syncAndSend () {
+	sendNextEvent()
+	if (storageGetBool('ruzEnabled') && localStorage.getItem('ruzLastUpdated') != formatDate(new Date()))
+		fetchRuzSchedule()
+}
+
+function formatDate (d) {
+	return d.toISOString().slice(0, 10).replace(/-/g, '.')
+}
+
+function fetchRuzSchedule () {
+	var curr = new Date()
+	var firstday = curr.getDate() - curr.getDay() + 1
+	var fromdate = formatDate(new Date(curr.setDate(firstday)))
+	var todate = formatDate(new Date(curr.setDate(firstday + 6)))
+
+	var url = 'http://ruz.hse.ru/RUZService.svc/personlessons?' + 'fromdate=' + fromdate + '&todate=' + todate + '&email=' + localStorage.getItem('ruzEmail')
+	console.log(url)
+	var req = new XMLHttpRequest()
+	req.open('GET', url, true)
+	req.setRequestHeader('User-Agent', 'Mozilla/5.0 (Linux; Android 5.1.1; One Build/LRX22C.H3) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/39.0.0.0 Mobile Safari/537.36')
+	req.setRequestHeader('Accept', 'application/json, text/plain, */*')
+	req.setRequestHeader('X-Requested-With', 'ru.hse.ruz')
+	req.onload = function () {
+		if (req.readyState !== 4 || req.status !== 200) { return }
+		var schedule = { 'Monday': [], 'Tuesday': [], 'Wednesday': [], 'Thursday': [], 'Friday': [], 'Saturday': [], 'Sunday': [] }
+		JSON.parse(req.responseText).forEach(function (entry) {
+			schedule[days[entry.dayOfWeek - 1]].push({
+				'start': entry.beginLesson,
+				'end': entry.endLesson,
+				'subj': entry.auditorium + ' ' + entry.discipline
+			})
+		})
+		var result = days.map(function (dn) {
+			return { 'day': dn, 'schedule': schedule[dn] }
+		})
+		setSchedules(result)
+		sendNextEvent()
+		localStorage.setItem('ruzLastUpdated', formatDate(new Date()))
+	}
+	req.send(null)
+}
+
 Pebble.addEventListener('ready', function (e) {
 	console.log('READY. Event: ' + JSON.stringify(e) + ' Schedules: ' + JSON.stringify(getSchedules()))
-	sendNextEvent()
+	syncAndSend()
 })
 
 Pebble.addEventListener('appmessage', function (e) {
 	console.log('APPMESSAGE. Event: ' + JSON.stringify(e))
-	if (e.payload.get) sendNextEvent()
+	if (e.payload.get)
+		syncAndSend()
 })
 
 Pebble.addEventListener('showConfiguration', function (e) {
-
 	Pebble.openURL(SETTINGS_URL + '#' + encodeURIComponent(JSON.stringify({
 		schedules: getSchedules(),
-		vibrateMinutes: localStorage.getItem('vibrateMinutes')
+		vibrateMinutes: localStorage.getItem('vibrateMinutes'),
+		ruzEmail: localStorage.getItem('ruzEmail'),
+		ruzEnabled: storageGetBool('ruzEnabled')
 	})))
 })
 
@@ -82,6 +131,10 @@ Pebble.addEventListener('webviewclosed', function (e) {
 	if (typeof rsp === 'object') {
 		setSchedules(rsp.schedules)
 		localStorage.setItem('vibrateMinutes', rsp.vibrateMinutes)
+		localStorage.setItem('ruzEmail', rsp.ruzEmail)
+		localStorage.setItem('ruzEnabled', JSON.stringify(rsp.ruzEnabled))
 		sendNextEvent()
+		if (rsp.ruzEnabled)
+			fetchRuzSchedule()
 	}
 })
