@@ -20,6 +20,20 @@ static TextLayer* text_layer_create_default(GRect rect) {
 	return tl;
 }
 
+#ifdef PBL_COLOR
+static void set_colors() {
+	window_set_background_color(window,                    GColorFromHEX(color_bg));
+	text_layer_set_background_color(tl_current_time,       GColorFromHEX(color_bg));
+	text_layer_set_background_color(tl_current_date,       GColorFromHEX(color_bg));
+	text_layer_set_background_color(tl_next_event_time,    GColorFromHEX(color_bg));
+	text_layer_set_background_color(tl_next_event_subject, GColorFromHEX(color_bg));
+	text_layer_set_text_color(tl_current_time,             GColorFromHEX(color_clock));
+	text_layer_set_text_color(tl_current_date,             GColorFromHEX(color_date));
+	text_layer_set_text_color(tl_next_event_time,          GColorFromHEX(color_timer));
+	text_layer_set_text_color(tl_next_event_subject,       GColorFromHEX(color_subject));
+}
+#endif
+
 static void handle_window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
@@ -40,6 +54,9 @@ static void handle_window_load(Window *window) {
 	layer_add_child(window_layer, text_layer_get_layer(tl_next_event_subject));
 #ifdef PBL_ROUND
 	text_layer_enable_screen_text_flow_and_paging(tl_next_event_subject, 2);
+#endif
+#ifdef PBL_COLOR
+	set_colors();
 #endif
 }
 
@@ -84,6 +101,9 @@ static void handle_message_receive(DictionaryIterator *iter, void *context) {
 	struct tm *cur_time = current_time();
 	data_set_from_dict(iter, cur_time);
 	update_next_event_time(cur_time);
+#ifdef PBL_COLOR
+	set_colors();
+#endif
 }
 
 static void handle_message_send_failed(DictionaryIterator *failed, AppMessageResult reason, void *context) {

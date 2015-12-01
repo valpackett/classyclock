@@ -1,0 +1,34 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+
+<dom-module id="color-picker">
+	<link rel="import" type="css" href="../theme.css">
+	<style>
+		paper-item { background: #fff; }
+		paper-item div { width: 2em; height: 1.5em; margin-right: 0.5em; border-radius: 3px; }
+	</style>
+
+	<template>
+		<paper-dropdown-menu label="[[label]]">
+			<paper-menu class="dropdown-content" selected="{{selected}}" attr-for-selected="value">
+				<template is="dom-repeat" items="[[colors]]" as="color">
+					<paper-item value="[[color.hex]]"><div style="background-color: [[color.hex]]"></div>[[color.name]]</paper-item>
+				</template>
+			</paper-menu>
+		</paper-dropdown-menu>
+	</template>
+</dom-module>
+
+<script> 'use strict';
+	var pebbleColors = [{"name":"Mint Green","hex":"#AAFFAA"},{"name":"Melon","hex":"#FFAAAA"},{"name":"Shocking Pink (Crayola)","hex":"#FF55FF"},{"name":"Folly","hex":"#FF0055"},{"name":"Sunset Orange","hex":"#FF5555"},{"name":"Army Green","hex":"#555500"},{"name":"Duke Blue","hex":"#0000AA"},{"name":"Tiffany Blue","hex":"#00AAAA"},{"name":"Screamin' Green","hex":"#55FF55"},{"name":"Pastel Yellow","hex":"#FFFFAA"},{"name":"Rich Brilliant Lavender","hex":"#FFAAFF"},{"name":"Bright Green","hex":"#55FF00"},{"name":"Brilliant Rose","hex":"#FF55AA"},{"name":"Cadet Blue","hex":"#55AAAA"},{"name":"Rose Vale","hex":"#AA5555"},{"name":"Fashion Magenta","hex":"#FF00AA"},{"name":"Jaeger Green","hex":"#00AA55"},{"name":"Baby Blue Eyes","hex":"#AAAAFF"},{"name":"Purpureus","hex":"#AA55AA"},{"name":"Chrome Yellow","hex":"#FFAA00"},{"name":"Dark Green (X11)","hex":"#005500"},{"name":"Red","hex":"#FF0000"},{"name":"Liberty","hex":"#5555AA"},{"name":"Light Gray","hex":"#AAAAAA"},{"name":"Vivid Violet","hex":"#AA00FF"},{"name":"Rajah","hex":"#FFAA55"},{"name":"Indigo (Web)","hex":"#5500AA"},{"name":"May Green","hex":"#55AA55"},{"name":"Icterine","hex":"#FFFF55"},{"name":"Bulgarian Rose","hex":"#550000"},{"name":"Orange","hex":"#FF5500"},{"name":"Green","hex":"#00FF00"},{"name":"Windsor Tan","hex":"#AA5500"},{"name":"Lavender Indigo","hex":"#AA55FF"},{"name":"Dark Gray","hex":"#555555"},{"name":"Electric Blue","hex":"#55FFFF"},{"name":"Blue Moon","hex":"#0055FF"},{"name":"Cyan","hex":"#00FFFF"},{"name":"Black","hex":"#000000"},{"name":"Medium Aquamarine","hex":"#55FFAA"},{"name":"Dark Candy Apple Red","hex":"#AA0000"},{"name":"Limerick","hex":"#AAAA00"},{"name":"Cobalt Blue","hex":"#0055AA"},{"name":"Celeste","hex":"#AAFFFF"},{"name":"Electric Ultramarine","hex":"#5500FF"},{"name":"Picton Blue","hex":"#55AAFF"},{"name":"Inchworm","hex":"#AAFF55"},{"name":"Blue","hex":"#0000FF"},{"name":"Vivid Cerulean","hex":"#00AAFF"},{"name":"Purple","hex":"#AA00AA"},{"name":"Kelly Green","hex":"#55AA00"},{"name":"Malachite","hex":"#00FF55"},{"name":"Midnight Green (Eagle Green)","hex":"#005555"},{"name":"Yellow","hex":"#FFFF00"},{"name":"Magenta","hex":"#FF00FF"},{"name":"Spring Bud","hex":"#AAFF00"},{"name":"Jazzberry Jam","hex":"#AA0055"},{"name":"Very Light Blue","hex":"#5555FF"},{"name":"White","hex":"#FFFFFF"},{"name":"Islamic Green","hex":"#00AA00"},{"name":"Oxford Blue","hex":"#000055"},{"name":"Imperial Purple","hex":"#550055"},{"name":"Brass","hex":"#AAAA55"},{"name":"Medium Spring Green","hex":"#00FFAA"}]
+	Polymer({
+		is: 'color-picker',
+		properties: {
+			'label': { type: String },
+			'colors': { type: Array, value: pebbleColors },
+			'selected': { type: String, notify: true }
+		}
+	})
+</script>

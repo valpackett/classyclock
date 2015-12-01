@@ -42,7 +42,12 @@ function serializeSchedule (flat_schedule) {
 
 function addSettings (message) {
 	var INT_MAX = 2147483647
-	message[String(INT_MAX - 1)] = parseInt(localStorage.getItem('vibrateMinutes') || 1)
+	message[String(INT_MAX - 1)]  = parseInt(localStorage.getItem('vibrateMinutes') || 1)
+	message[String(INT_MAX - 10)] = parseInt((localStorage.getItem('colorBg')       || '#FFAAAA').slice(1), 16)
+	message[String(INT_MAX - 11)] = parseInt((localStorage.getItem('colorClock')    || '#555500').slice(1), 16)
+	message[String(INT_MAX - 12)] = parseInt((localStorage.getItem('colorDate')     || '#555500').slice(1), 16)
+	message[String(INT_MAX - 13)] = parseInt((localStorage.getItem('colorTimer')    || '#555500').slice(1), 16)
+	message[String(INT_MAX - 14)] = parseInt((localStorage.getItem('colorSubject')  || '#555500').slice(1), 16)
 	console.log('Message: ' + JSON.stringify(message))
 	return message
 }
@@ -92,8 +97,8 @@ function fetchRuzSchedule () {
 		JSON.parse(req.responseText).forEach(function (entry) {
 			schedule[days[entry.dayOfWeek - 1]].push({
 				'start': entry.beginLesson,
-				'end': entry.endLesson,
-				'subj': entry.auditorium + ' ' + entry.discipline
+				'end':   entry.endLesson,
+				'subj':  entry.auditorium + ' ' + entry.discipline
 			})
 		})
 		var result = days.map(function (dn) {
@@ -119,10 +124,15 @@ Pebble.addEventListener('appmessage', function (e) {
 
 Pebble.addEventListener('showConfiguration', function (e) {
 	Pebble.openURL(SETTINGS_URL + '#' + encodeURIComponent(JSON.stringify({
-		schedules: getSchedules(),
+		schedules:      getSchedules(),
 		vibrateMinutes: localStorage.getItem('vibrateMinutes'),
-		ruzEmail: localStorage.getItem('ruzEmail'),
-		ruzEnabled: storageGetBool('ruzEnabled')
+		ruzEmail:       localStorage.getItem('ruzEmail'),
+		ruzEnabled:     storageGetBool('ruzEnabled'),
+		colorBg:        localStorage.getItem('colorBg'),
+		colorClock:     localStorage.getItem('colorClock'),
+		colorDate:      localStorage.getItem('colorDate'),
+		colorTimer:     localStorage.getItem('colorTimer'),
+		colorSubject:   localStorage.getItem('colorSubject'),
 	})))
 })
 
@@ -133,6 +143,11 @@ Pebble.addEventListener('webviewclosed', function (e) {
 		localStorage.setItem('vibrateMinutes', rsp.vibrateMinutes)
 		localStorage.setItem('ruzEmail', rsp.ruzEmail)
 		localStorage.setItem('ruzEnabled', JSON.stringify(rsp.ruzEnabled))
+		localStorage.setItem('colorBg', rsp.colorBg)
+		localStorage.setItem('colorClock', rsp.colorClock)
+		localStorage.setItem('colorDate', rsp.colorDate)
+		localStorage.setItem('colorTimer', rsp.colorTimer)
+		localStorage.setItem('colorSubject', rsp.colorSubject)
 		sendNextEvent()
 		if (rsp.ruzEnabled)
 			fetchRuzSchedule()

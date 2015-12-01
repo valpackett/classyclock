@@ -18,6 +18,8 @@
 <link rel="import" href="../bower_components/neon-animation/animations/scale-up-animation.html">
 <link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
 
+<link rel="import" href="color-picker.html">
+
 <script src="../bower_components/freezer-js/build/freezer.min.js"></script>
 
 <dom-module id="settings-app">
@@ -35,6 +37,8 @@
 		.little-help { color: #444; font-size: 0.94em; }
 
 		.entry-actions { margin: 0 0.8em 20px; text-align: right; }
+
+		.color-preview { width: 40%; text-align: center; padding: 2em; margin: 1em; }
 	</style>
 
 
@@ -76,6 +80,25 @@
 							<span>minutes before a class begins/ends</span>
 						</label>
 					</paper-material>
+
+					<paper-material class="card settings-card" elevation="1">
+						<h2>Colors</h2>
+						<color-picker label="Background" selected="{{colorBg}}"></color-picker>
+						<color-picker label="Clock" selected="{{colorClock}}"></color-picker>
+						<color-picker label="Date" selected="{{colorDate}}"></color-picker>
+						<color-picker label="Time to next class" selected="{{colorTimer}}"></color-picker>
+						<color-picker label="Subject" selected="{{colorSubject}}"></color-picker>
+						<div class="color-preview" style="background-color: [[colorBg]]">
+							<h1 style="color: [[colorClock]]">01:00</h1>
+							<h2 style="color: [[colorDate]]">Wed Dec 2</h2>
+							<div style="color: [[colorTimer]]">Begins in 1h20m:</div>
+							<div style="color: [[colorSubject]]">Discrete Mathematics and Its Applications</div>
+						</div>
+						<p class="little-help">
+							For colorful Pebbles.
+						</p>
+					</paper-material>
+
 					<paper-material class="card settings-card" elevation="1">
 						<h2>Backup/restore</h2>
 						<paper-textarea value="{{backupText}}"></paper-textarea>
@@ -86,6 +109,7 @@
 							To restore: copy the text of your backup, paste it above, tap Restore.
 						</p>
 					</paper-material>
+
 					<paper-material class="card settings-card" elevation="1">
 						<h2>Import from My Class Schedule for Android</h2>
 						<form id="classschedule-import-form" action="../../import/myclassschedule" method="POST" enctype="multipart/form-data">
@@ -100,6 +124,7 @@
 							Tap Import. Then, make a backup, reopen this settings page in the Pebble app, paste and restore.
 						</p>
 					</paper-material>
+
 					<paper-material class="card settings-card" elevation="1">
 						<h2>Sync from ruz.hse.ru</h2>
 						<label class="input-label">
@@ -173,6 +198,11 @@
 			backupText: { type: String, value: '' },
 			ruzEmail: { type: String, value: localStorage.getItem('ruzEmail') || '' },
 			ruzEnabled: { type: Boolean, value: localStorage.getItem('ruzEnabled') || false },
+			colorBg: { type: String, value: localStorage.getItem('colorBg') || '#FFAAAA' },
+			colorClock: { type: String, value: localStorage.getItem('colorClock') || '#555500' },
+			colorDate: { type: String, value: localStorage.getItem('colorDate') || '#555500' },
+			colorTimer: { type: String, value: localStorage.getItem('colorTimer') || '#555500' },
+			colorSubject: { type: String, value: localStorage.getItem('colorSubject') || '#555500' },
 			currentUrl: { type: String, value: document.location.href.replace(/[#?].*/, '') },
 			data: { type: Object, value: { } },
 		},
@@ -187,6 +217,11 @@
 				this.vibrateMinutes = hashobj.vibrateMinutes || this.vibrateMinutes
 				this.ruzEmail = hashobj.ruzEmail || this.ruzEmail
 				this.ruzEnabled = hashobj.ruzEnabled || this.ruzEnabled
+				this.colorBg = hashobj.colorBg || this.colorBg
+				this.colorClock = hashobj.colorClock || this.colorClock
+				this.colorDate = hashobj.colorDate || this.colorDate
+				this.colorTimer = hashobj.colorTimer || this.colorTimer
+				this.colorSubject = hashobj.colorSubject || this.colorSubject
 			} else {
 				initialSchedule = dayNames.map(function (dn) {
 					return { 'day': dn, 'schedule': [ {'start': '23:58', 'end': '23:59', 'subj': 'Edit schedule on phone'} ] }
@@ -219,12 +254,31 @@
 				schedules: this.data.schedules,
 				vibrateMinutes: this.vibrateMinutes,
 				ruzEmail: this.ruzEmail,
-				ruzEnabled: this.ruzEnabled
+				ruzEnabled: this.ruzEnabled,
+				colorBg: this.colorBg,
+				colorClock: this.colorClock,
+				colorDate: this.colorDate,
+				colorTimer: this.colorTimer,
+				colorSubject: this.colorSubject
 			})
 			localStorage.setItem('vibrateMinutes', this.vibrateMinutes)
+			localStorage.setItem('colorBg', this.colorBg)
+			localStorage.setItem('colorClock', this.colorClock)
+			localStorage.setItem('colorDate', this.colorDate)
+			localStorage.setItem('colorTimer', this.colorTimer)
+			localStorage.setItem('colorSubject', this.colorSubject)
 		},
 		restore: function () {
-			this.data.set('schedules', JSON.parse(this.backupText).schedules)
+			var o = JSON.parse(this.backupText)
+			this.data.set('schedules', o.schedules)
+			this.set('vibrateMinutes', o.vibrateMinutes)
+			this.set('ruzEmail', o.ruzEmail)
+			this.set('ruzEnabled', o.ruzEnabled)
+			this.set('colorBg', o.colorBg)
+			this.set('colorClock', o.colorClock)
+			this.set('colorDate', o.colorDate)
+			this.set('colorTimer', o.colorTimer)
+			this.set('colorSubject', o.colorSubject)
 		},
 		submitClassschedule: function () {
 			this.$['classschedule-import-form'].submit()
@@ -258,5 +312,5 @@
 			e.model.entry.set(e.target.name, e.target.value)
 		}
 
-	});
+	})
 </script>
