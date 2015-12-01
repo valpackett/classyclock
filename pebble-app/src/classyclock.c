@@ -74,7 +74,7 @@ static void update_next_event_time(struct tm *tick_time) {
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 	text_layer_set_text(tl_current_time, format_time(tick_time));
 	text_layer_set_text(tl_current_date, format_date(tick_time));
-	if (tick_time->tm_wday != schedule_weekday)
+	if (tick_time->tm_wday != schedule_weekday || tick_time->tm_min == 0)
 		data_request_from_phone();
 	update_next_event_time(tick_time);
 }
