@@ -79,6 +79,12 @@
 							<paper-input class="labelled-input" required type="number" value="{{vibrateMinutes}}"></paper-input>
 							<span>minutes before a class begins/ends</span>
 						</label>
+						<p>
+							<paper-toggle-button checked="{{timelineEnabled}}">Enable Timeline integration</paper-toggle-button>
+						</p>
+						<p class="little-help">
+							Using Pebble Timeline will send your schedule to Pebble's servers through Classy Clock servers.
+						</p>
 					</paper-material>
 
 					<paper-material class="card settings-card" elevation="1">
@@ -198,6 +204,7 @@
 			backupText: { type: String, value: '' },
 			ruzEmail: { type: String, value: localStorage.getItem('ruzEmail') || '' },
 			ruzEnabled: { type: Boolean, value: localStorage.getItem('ruzEnabled') || false },
+			timelineEnabled: { type: Boolean, value: localStorage.getItem('timelineEnabled') || false },
 			colorBg: { type: String, value: localStorage.getItem('colorBg') || '#FFAAAA' },
 			colorClock: { type: String, value: localStorage.getItem('colorClock') || '#555500' },
 			colorDate: { type: String, value: localStorage.getItem('colorDate') || '#555500' },
@@ -217,6 +224,7 @@
 				this.vibrateMinutes = hashobj.vibrateMinutes || this.vibrateMinutes
 				this.ruzEmail = hashobj.ruzEmail || this.ruzEmail
 				this.ruzEnabled = hashobj.ruzEnabled || this.ruzEnabled
+				this.timelineEnabled = hashobj.timelineEnabled || this.timelineEnabled
 				this.colorBg = hashobj.colorBg || this.colorBg
 				this.colorClock = hashobj.colorClock || this.colorClock
 				this.colorDate = hashobj.colorDate || this.colorDate
@@ -255,6 +263,7 @@
 				vibrateMinutes: this.vibrateMinutes,
 				ruzEmail: this.ruzEmail,
 				ruzEnabled: this.ruzEnabled,
+				timelineEnabled: this.timelineEnabled,
 				colorBg: this.colorBg,
 				colorClock: this.colorClock,
 				colorDate: this.colorDate,
@@ -274,6 +283,7 @@
 			this.set('vibrateMinutes', o.vibrateMinutes)
 			this.set('ruzEmail', o.ruzEmail)
 			this.set('ruzEnabled', o.ruzEnabled)
+			this.set('timelineEnabled', o.timelineEnabled)
 			this.set('colorBg', o.colorBg)
 			this.set('colorClock', o.colorClock)
 			this.set('colorDate', o.colorDate)

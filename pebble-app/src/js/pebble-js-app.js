@@ -1,5 +1,7 @@
-var SETTINGS_URL = 'https://unrelenting.technology/classyclock/static/settings.html'
-//SETTINGS_URL = 'http://192.168.1.3:4343/static/settings.html'
+var SERVER_HOST = 'https://unrelenting.technology/classyclock'
+//SERVER_HOST = 'http://192.168.1.3:4343'
+var SETTINGS_URL = SERVER_HOST + '/static/settings.html'
+var TIMELINE_URL = SERVER_HOST + '/timeline'
 
 var days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 var defaultSchedules = days.map(function (dn) {
@@ -72,6 +74,8 @@ function syncAndSend () {
 	sendNextEvent()
 	if (storageGetBool('ruzEnabled') && localStorage.getItem('ruzLastUpdated') != formatDate(new Date()))
 		fetchRuzSchedule()
+	else // done in fetchRuzSchedule on load
+		pushToTimeline(false)
 }
 
 function formatDate (d) {
@@ -92,7 +96,11 @@ function fetchRuzSchedule () {
 	req.setRequestHeader('Accept', 'application/json, text/plain, */*')
 	req.setRequestHeader('X-Requested-With', 'ru.hse.ruz')
 	req.onload = function () {
-		if (req.readyState !== 4 || req.status !== 200) { return }
+		if (req.readyState !== 4 || req.status !== 200) {
+			console.log('ruz error')
+			pushToTimeline(false)
+			return
+		}
 		var schedule = { 'Monday': [], 'Tuesday': [], 'Wednesday': [], 'Thursday': [], 'Friday': [], 'Saturday': [], 'Sunday': [] }
 		JSON.parse(req.responseText).forEach(function (entry) {
 			schedule[days[entry.dayOfWeek - 1]].push({
@@ -104,11 +112,35 @@ function fetchRuzSchedule () {
 		var result = days.map(function (dn) {
 			return { 'day': dn, 'schedule': schedule[dn] }
 		})
+		console.log('ruz success')
 		setSchedules(result)
 		sendNextEvent()
 		localStorage.setItem('ruzLastUpdated', formatDate(new Date()))
+		pushToTimeline(true)
 	}
 	req.send(null)
+}
+
+function pushToTimeline (forceUpdate) {
+	if (!storageGetBool('timelineEnabled') || (!forceUpdate && localStorage.getItem('timelineLastUpdated') == formatDate(new Date()))) { return }
+	Pebble.getTimelineToken(function (token) {
+		var url = TIMELINE_URL + '?token=' + token
+		console.log(url)
+		var req = new XMLHttpRequest()
+		req.open('POST', url, true)
+		req.setRequestHeader('Content-Type', 'application/json')
+		req.onload = function () {
+			if (req.readyState !== 4 || req.status !== 200) {
+				console.log('Timeline error')
+				return
+			}
+			console.log('Timeline success')
+			localStorage.setItem('timelineLastUpdated', formatDate(new Date()))
+		}
+		req.send(JSON.stringify(getScheduleForToday()))
+	}, function (error) {
+		console.log('Timeline token not available: ' + error)
+	})
 }
 
 Pebble.addEventListener('ready', function (e) {
@@ -124,15 +156,16 @@ Pebble.addEventListener('appmessage', function (e) {
 
 Pebble.addEventListener('showConfiguration', function (e) {
 	Pebble.openURL(SETTINGS_URL + '#' + encodeURIComponent(JSON.stringify({
-		schedules:      getSchedules(),
-		vibrateMinutes: localStorage.getItem('vibrateMinutes'),
-		ruzEmail:       localStorage.getItem('ruzEmail'),
-		ruzEnabled:     storageGetBool('ruzEnabled'),
-		colorBg:        localStorage.getItem('colorBg'),
-		colorClock:     localStorage.getItem('colorClock'),
-		colorDate:      localStorage.getItem('colorDate'),
-		colorTimer:     localStorage.getItem('colorTimer'),
-		colorSubject:   localStorage.getItem('colorSubject'),
+		schedules:         getSchedules(),
+		vibrateMinutes:    localStorage.getItem('vibrateMinutes'),
+		ruzEmail:          localStorage.getItem('ruzEmail'),
+		ruzEnabled:        storageGetBool('ruzEnabled'),
+		timelineEnabled:   storageGetBool('timelineEnabled'),
+		colorBg:           localStorage.getItem('colorBg'),
+		colorClock:        localStorage.getItem('colorClock'),
+		colorDate:         localStorage.getItem('colorDate'),
+		colorTimer:        localStorage.getItem('colorTimer'),
+		colorSubject:      localStorage.getItem('colorSubject'),
 	})))
 })
 
@@ -143,6 +176,7 @@ Pebble.addEventListener('webviewclosed', function (e) {
 		localStorage.setItem('vibrateMinutes', rsp.vibrateMinutes)
 		localStorage.setItem('ruzEmail', rsp.ruzEmail)
 		localStorage.setItem('ruzEnabled', JSON.stringify(rsp.ruzEnabled))
+		localStorage.setItem('timelineEnabled', JSON.stringify(rsp.timelineEnabled))
 		localStorage.setItem('colorBg', rsp.colorBg)
 		localStorage.setItem('colorClock', rsp.colorClock)
 		localStorage.setItem('colorDate', rsp.colorDate)
@@ -151,5 +185,7 @@ Pebble.addEventListener('webviewclosed', function (e) {
 		sendNextEvent()
 		if (rsp.ruzEnabled)
 			fetchRuzSchedule()
+		else
+			pushToTimeline(true)
 	}
 })

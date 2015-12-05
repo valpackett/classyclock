@@ -11,7 +11,10 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/janekolszak/go-pebble"
+	"github.com/jinzhu/now"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -19,6 +22,7 @@ func main() {
 	var port = os.Getenv("PORT")
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./settings-app/"))))
 	http.HandleFunc("/import/myclassschedule", mcsImportHandler)
+	http.HandleFunc("/timeline", timelineHandler)
 	fmt.Println("Server started on port " + port)
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
@@ -100,4 +104,35 @@ func mcsImportHandler(res http.ResponseWriter, req *http.Request) {
 	}
 	rows.Close()
 	respondWithSchedule(res, req, []Day{mon, tue, wed, thu, fri, sat, sun})
+}
+
+func timelineHandler(res http.ResponseWriter, req *http.Request) {
+	req.Body = http.MaxBytesReader(res, req.Body, 64*1024)
+	var classes []Class
+	err := json.NewDecoder(req.Body).Decode(&classes)
+	if err != nil {
+		panic(err)
+	}
+	token := req.URL.Query().Get("token")
+	client := &http.Client{}
+	for _, class := range classes {
+		start := now.MustParse(class.Start)
+		end := now.MustParse(class.End)
+		layout := pebble.Layout{
+			Type:     "calendarPin",
+			Title:    class.Subj,
+			TinyIcon: "system://images/SCHEDULED_EVENT",
+		}
+		pin := pebble.Pin{
+			Id:       fmt.Sprintf("%s%s%s", token[:32], start.Format("2006-01-02T15:04"), end.Format("2006-01-02T15:04")),
+			Time:     start.Format(time.RFC3339),
+			Duration: int(end.Sub(start).Minutes()),
+			Layout:   &layout,
+		}
+		uPin := pebble.UserPin{
+			Pin:   pin,
+			Token: token,
+		}
+		uPin.Put(client)
+	}
 }
