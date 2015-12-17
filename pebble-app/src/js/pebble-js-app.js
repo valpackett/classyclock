@@ -79,14 +79,15 @@ function syncAndSend () {
 }
 
 function formatDate (d) {
-	return d.toISOString().slice(0, 10).replace(/-/g, '.')
+	// toISOString converts to UTC!!
+	return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()
 }
 
 function fetchRuzSchedule () {
 	var curr = new Date()
 	var firstday = curr.getDate() - curr.getDay() + 1
-	var fromdate = formatDate(new Date(curr.setDate(firstday)))
-	var todate = formatDate(new Date(curr.setDate(firstday + 6)))
+	var fromdate = formatDate(new Date(curr.setDate(firstday))).replace('-', '.')
+	var todate = formatDate(new Date(curr.setDate(firstday + 6))).replace('-', '.')
 
 	var url = 'http://ruz.hse.ru/RUZService.svc/personlessons?' + 'fromdate=' + fromdate + '&todate=' + todate + '&email=' + localStorage.getItem('ruzEmail')
 	console.log(url)
@@ -122,9 +123,14 @@ function fetchRuzSchedule () {
 }
 
 function pushToTimeline (forceUpdate) {
-	if (!storageGetBool('timelineEnabled') || (!forceUpdate && localStorage.getItem('timelineLastUpdated') == formatDate(new Date()))) { return }
+	if (!storageGetBool('timelineEnabled')) { return }
+	if (!forceUpdate && localStorage.getItem('timelineLastUpdated') == formatDate(new Date())) {
+		console.log('Timeline already pushed at ' + localStorage.getItem('timelineLastUpdated'))
+		return
+	}
 	Pebble.getTimelineToken(function (token) {
-		var url = TIMELINE_URL + '?token=' + token + '&tz=' + new Date().getTimezoneOffset()
+		var curr = new Date()
+		var url = TIMELINE_URL + '?token=' + token + '&tz=' + curr.getTimezoneOffset() + '&date=' + formatDate(curr)
 		console.log(url)
 		var req = new XMLHttpRequest()
 		req.open('POST', url, true)

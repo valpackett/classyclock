@@ -1,5 +1,3 @@
-// should run on a server with utc time
-
 package main
 
 import (
@@ -12,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -116,18 +115,25 @@ func timelineHandler(res http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 	token := req.URL.Query().Get("token")
-	tz, _ := time.ParseDuration(req.URL.Query().Get("tz") + "m")
+	year, month, day := now.MustParse(req.URL.Query().Get("date")).Date()
+	tz_js, err := strconv.Atoi(req.URL.Query().Get("tz"))
+	if err != nil {
+		panic(err)
+	}
+	tz := time.FixedZone("", tz_js*-60) // minutes west of UTC -> seconds east of UTC
 	client := &http.Client{}
 	for _, class := range classes {
-		start := now.MustParse(class.Start).Add(tz)
-		end := now.MustParse(class.End).Add(tz)
+		start_t := now.MustParse(class.Start)
+		end_t := now.MustParse(class.End)
+		start := time.Date(year, month, day, start_t.Hour(), start_t.Minute(), 0, 0, tz)
+		end := time.Date(year, month, day, end_t.Hour(), end_t.Minute(), 0, 0, tz)
 		layout := pebble.Layout{
 			Type:     "calendarPin",
 			Title:    class.Subj,
 			TinyIcon: "system://images/SCHEDULED_EVENT",
 		}
 		pin := pebble.Pin{
-			Id:       fmt.Sprintf("%s%s%s", token[:32], start.Format("2006-01-02T15:04Z"), end.Format("2006-01-02T15:04Z")),
+			Id:       fmt.Sprintf("%s%s%s", token[:32], start.Format("2006-01-02T15:04"), end.Format("2006-01-02T15:04")), // The id must be 64 chars!!
 			Time:     start.Format(time.RFC3339),
 			Duration: int(end.Sub(start).Minutes()),
 			Layout:   &layout,
