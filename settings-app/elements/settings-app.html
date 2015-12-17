@@ -244,6 +244,10 @@
 			store.on('update', function (newValue) {
 				this.data = newValue
 			}.bind(this))
+			var fakes = document.body.querySelectorAll('.fake')
+			for (var i = 0; i < fakes.length; i++) {
+				document.body.removeChild(fakes[i])
+			}
 		},
 
 		openCancelDialog: function () {
