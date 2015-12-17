@@ -114,10 +114,11 @@ func timelineHandler(res http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 	token := req.URL.Query().Get("token")
+	tz, _ := time.ParseDuration(req.URL.Query().Get("tz") + "m")
 	client := &http.Client{}
 	for _, class := range classes {
-		start := now.MustParse(class.Start)
-		end := now.MustParse(class.End)
+		start := now.MustParse(class.Start).Add(tz)
+		end := now.MustParse(class.End).Add(tz)
 		layout := pebble.Layout{
 			Type:     "calendarPin",
 			Title:    class.Subj,

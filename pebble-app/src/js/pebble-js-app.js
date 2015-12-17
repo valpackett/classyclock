@@ -124,7 +124,7 @@ function fetchRuzSchedule () {
 function pushToTimeline (forceUpdate) {
 	if (!storageGetBool('timelineEnabled') || (!forceUpdate && localStorage.getItem('timelineLastUpdated') == formatDate(new Date()))) { return }
 	Pebble.getTimelineToken(function (token) {
-		var url = TIMELINE_URL + '?token=' + token
+		var url = TIMELINE_URL + '?token=' + token + '&tz=' + new Date().getTimezoneOffset()
 		console.log(url)
 		var req = new XMLHttpRequest()
 		req.open('POST', url, true)
