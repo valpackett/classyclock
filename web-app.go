@@ -1,3 +1,5 @@
+// should run on a server with utc time
+
 package main
 
 import (
@@ -125,7 +127,7 @@ func timelineHandler(res http.ResponseWriter, req *http.Request) {
 			TinyIcon: "system://images/SCHEDULED_EVENT",
 		}
 		pin := pebble.Pin{
-			Id:       fmt.Sprintf("%s%s%s", token[:32], start.Format("2006-01-02T15:04"), end.Format("2006-01-02T15:04")),
+			Id:       fmt.Sprintf("%s%s%s", token[:32], start.Format("2006-01-02T15:04Z"), end.Format("2006-01-02T15:04Z")),
 			Time:     start.Format(time.RFC3339),
 			Duration: int(end.Sub(start).Minutes()),
 			Layout:   &layout,
