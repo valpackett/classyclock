@@ -1,0 +1,24 @@
+<!-- bindings like style="color: [[color]]" don't work in chromium :( -->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="color-div">
+	<style>
+		:host { display: block; }
+	</style>
+	<template>
+		<content id="content"></content>
+	</template>
+</dom-module>
+
+<script> 'use strict';
+	Polymer({
+		is: 'color-div',
+		properties: {
+			'bg': { type: String, observer: '_changeBg' },
+			'fg': { type: String, observer: '_changeFg' },
+		},
+		_changeBg: function (v, _) { this.style.background = v },
+		_changeFg: function (v, _) { this.style.color = v }
+	})
+</script>

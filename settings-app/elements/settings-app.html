@@ -19,6 +19,7 @@
 <link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
 
 <link rel="import" href="color-picker.html">
+<link rel="import" href="color-div.html">
 
 <script src="../bower_components/freezer-js/build/freezer.min.js"></script>
 
@@ -39,6 +40,8 @@
 		.entry-actions { margin: 0 0.8em 20px; text-align: right; }
 
 		.color-preview { width: 40%; text-align: center; padding: 2em; margin: 1em; }
+		.color-preview-time { font-size: 45px; }
+		.color-preview-date { font-size: 35px;; }
 	</style>
 
 
@@ -94,12 +97,12 @@
 						<color-picker label="Date" selected="{{colorDate}}"></color-picker>
 						<color-picker label="Time to next class" selected="{{colorTimer}}"></color-picker>
 						<color-picker label="Subject" selected="{{colorSubject}}"></color-picker>
-						<div class="color-preview" style="background-color: [[colorBg]]">
-							<h1 style="color: [[colorClock]]">01:00</h1>
-							<h2 style="color: [[colorDate]]">Wed Dec 2</h2>
-							<div style="color: [[colorTimer]]">Begins in 1h20m:</div>
-							<div style="color: [[colorSubject]]">Discrete Mathematics and Its Applications</div>
-						</div>
+						<color-div class="color-preview" bg="[[colorBg]]">
+							<color-div fg="[[colorClock]]" class="color-preview-time">01:00</color-div>
+							<color-div fg="[[colorDate]]" class="color-preview-date">Wed Dec 2</color-div>
+							<color-div fg="[[colorTimer]]">Begins in 1h20m:</color-div>
+							<color-div fg="[[colorSubject]]">Discrete Mathematics and Its Applications</color-div>
+						</color-div>
 						<p class="little-help">
 							For colorful Pebbles.
 						</p>

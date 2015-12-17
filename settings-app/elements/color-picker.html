@@ -3,18 +3,23 @@
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 
+<link rel="import" href="color-div.html">
+
 <dom-module id="color-picker">
 	<link rel="import" type="css" href="../theme.css">
 	<style>
 		paper-item { background: #fff; }
-		paper-item div { width: 2em; height: 1.5em; margin-right: 0.5em; border-radius: 3px; }
+		paper-item color-div { width: 2em; height: 1.5em; margin-right: 0.5em; border-radius: 3px; }
 	</style>
 
 	<template>
 		<paper-dropdown-menu label="[[label]]">
 			<paper-menu class="dropdown-content" selected="{{selected}}" attr-for-selected="value">
 				<template is="dom-repeat" items="[[colors]]" as="color">
-					<paper-item value="[[color.hex]]"><div style="background-color: [[color.hex]]"></div>[[color.name]]</paper-item>
+					<paper-item value="[[color.hex]]">
+						<color-div bg="[[color.hex]]"></color-div>
+						[[color.name]]
+					</paper-item>
 				</template>
 			</paper-menu>
 		</paper-dropdown-menu>
