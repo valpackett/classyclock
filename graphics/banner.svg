@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="720"
+   height="320"
+   viewBox="0 0 720.00001 320.00001"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="banner.svg"
+   inkscape:export-filename="/Users/greg/src/codeberg.org/valpackett/classyclock/graphics/banner.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4">
+    <mask
+       maskUnits="userSpaceOnUse"
+       id="mask4277">
+      <rect
+         style="fill:#26c3a7;fill-opacity:1;stroke:none"
+         id="rect4279"
+         width="144"
+         height="168"
+         x="87.285713"
+         y="811.21924"
+         ry="5.3571429" />
+    </mask>
+    <mask
+       maskUnits="userSpaceOnUse"
+       id="mask4844">
+      <rect
+         style="fill:#ffffff;fill-opacity:1;stroke:none"
+         id="rect4846"
+         width="144"
+         height="168"
+         x="61.285713"
+         y="808.36212"
+         ry="9.0913725" />
+    </mask>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.979899"
+     inkscape:cx="370.02523"
+     inkscape:cy="185.27377"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     showborder="true"
+     inkscape:showpageshadow="false"
+     showguides="false"
+     inkscape:window-width="2125"
+     inkscape:window-height="1082"
+     inkscape:window-x="399"
+     inkscape:window-y="309"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-732.36214)">
+    <rect
+       style="fill:#570911;fill-opacity:1;stroke:none"
+       id="rect4328"
+       width="720"
+       height="320"
+       x="0"
+       y="732.36218"
+       ry="0" />
+    <g
+       id="g4764">
+      <text
+         sodipodi:linespacing="125%"
+         id="text4281"
+         y="808.0271"
+         x="319.73633"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:70px;line-height:125%;font-family:'Londrina Solid';-inkscape-font-specification:'Londrina Solid';letter-spacing:0px;word-spacing:0px;fill:#e4c5cc;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           y="808.0271"
+           x="319.73633"
+           id="tspan4283"
+           sodipodi:role="line">Classy Clock</tspan></text>
+      <text
+         sodipodi:linespacing="115%"
+         id="text4285"
+         y="869.23767"
+         x="485.95239"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:114.99999762%;font-family:'Averia Serif Libre';-inkscape-font-specification:'Averia Serif Libre';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#e4baba;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           dx="0"
+           style="line-height:114.99999762%;letter-spacing:0.1px"
+           y="869.23767"
+           x="486.00238"
+           id="tspan4287"
+           sodipodi:role="line">Time to your next class</tspan><tspan
+           style="font-size:32.5px;text-align:center;letter-spacing:-0.18000001px;text-anchor:middle"
+           id="tspan4289"
+           y="908.87708"
+           x="485.8624"
+           sodipodi:role="line">(or the end of the current one)</tspan><tspan
+           dx="0"
+           style="font-size:35px;line-height:112.00000048%;letter-spacing:0px"
+           id="tspan4291"
+           y="947.59796"
+           x="485.95239"
+           sodipodi:role="line">on your wrist</tspan></text>
+      <text
+         sodipodi:linespacing="125%"
+         id="text4297"
+         y="989.73273"
+         x="485.98718"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:17.5px;line-height:125%;font-family:'Roboto Condensed';-inkscape-font-specification:'Roboto Condensed, ';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#dea9a9;fill-opacity:0.82323237;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           id="tspan4301"
+           y="989.73273"
+           x="485.98718"
+           sodipodi:role="line">Schedule backup and restore | Vibration before class</tspan><tspan
+           id="tspan4307"
+           y="1011.6077"
+           x="485.98718"
+           sodipodi:role="line">Unicode support | My Class Schedule import</tspan><tspan
+           id="tspan4305"
+           y="1033.4827"
+           x="485.98718"
+           sodipodi:role="line">Optional Timeline integration | Customizable colors</tspan></text>
+    </g>
+    <g
+       id="g4293"
+       transform="translate(-26,0)"
+       style="opacity:0">
+      <image
+         sodipodi:absref="/Users/greg/src/codeberg.org/valpackett/classyclock/graphics/pebble-red.png"
+         xlink:href="pebble-red.png"
+         style=""
+         y="707.79071"
+         x="42.14286"
+         id="image4198"
+         preserveAspectRatio="none"
+         height="370.57144"
+         width="234.57143" />
+      <image
+         sodipodi:absref="/Users/greg/src/codeberg.org/valpackett/classyclock/graphics/screenshot_aplite.png"
+         xlink:href="screenshot_aplite.png"
+         style=""
+         y="811.21924"
+         x="87.285713"
+         id="image4260"
+         preserveAspectRatio="none"
+         height="168"
+         width="144"
+         mask="url(#mask4277)" />
+    </g>
+    <g
+       id="g4848"
+       style="opacity:0">
+      <image
+         sodipodi:absref="/Users/greg/src/codeberg.org/valpackett/classyclock/graphics/pebble-time-red.png"
+         xlink:href="pebble-time-red.png"
+         style=""
+         y="718.62482"
+         x="12.329991"
+         id="image4761"
+         preserveAspectRatio="none"
+         height="347.47461"
+         width="241.47462" />
+      <image
+         sodipodi:absref="/Users/greg/src/codeberg.org/valpackett/classyclock/graphics/screenshot_basalt.png"
+         xlink:href="screenshot_basalt.png"
+         y="808.36212"
+         x="61.285713"
+         id="image4835"
+         preserveAspectRatio="none"
+         height="168"
+         width="144"
+         style=""
+         mask="url(#mask4844)" />
+    </g>
+    <g
+       id="g4976"
+       transform="translate(-12,0)">
+      <image
+         sodipodi:absref="/Users/greg/src/codeberg.org/valpackett/classyclock/graphics/pebble-time-round-red-14.png"
+         xlink:href="pebble-time-round-red-14.png"
+         y="697.36212"
+         x="-2.3172207"
+         id="image4911"
+         preserveAspectRatio="none"
+         height="390"
+         width="294" />
+      <image
+         sodipodi:absref="/Users/greg/src/codeberg.org/valpackett/classyclock/graphics/screenshot_chalk.png"
+         xlink:href="screenshot_chalk.png"
+         y="802.36212"
+         x="55.285713"
+         id="image4973"
+         preserveAspectRatio="none"
+         height="180"
+         width="180" />
+    </g>
+  </g>
+</svg>
