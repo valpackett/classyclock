@@ -3,12 +3,6 @@
  * Inspired by https://github.com/pebble/slate
  */
 
-@font-face {
-  font-family: 'PFDinDisplayProLightWebfont';
-  src: url('PFDinDisplayPro-Light.woff') format('woff');
-  font-weight: normal; font-style: normal; font-variant: normal;
-}
-
 * { font-family: 'PFDinDisplayPro-Light', PFDinDisplayProLightWebfont, sans-serif; }
 
 html { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; font-size: 1.2em; }
