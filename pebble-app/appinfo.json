@@ -3,8 +3,8 @@
   "shortName": "Classy Clock",
   "longName": "Classy Clock",
   "companyName": "unrelenting.technology",
-  "versionLabel": "2.0",
-  "versionCode": "20",
+  "versionLabel": "2.1",
+  "versionCode": "21",
   "sdkVersion": "3",
   "targetPlatforms": [
     "aplite",
