@@ -70,6 +70,10 @@ static void handle_window_unload(Window *window) {
 static void set_class_text(char* time, char* subject) {
 	text_layer_set_text(tl_next_event_time, time);
 	text_layer_set_text(tl_next_event_subject, subject);
+	
+	text_layer_set_font(tl_next_event_subject, (strlen(subject) > 40)
+			? fonts_get_system_font(FONT_KEY_GOTHIC_14)
+			: fonts_get_system_font(FONT_KEY_GOTHIC_18));
 }
 
 static void update_next_event_time(struct tm *tick_time) {
