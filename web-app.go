@@ -7,25 +7,56 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
+	"github.com/braintree/manners"
 	"github.com/janekolszak/go-pebble"
 	"github.com/jinzhu/now"
+	"github.com/lemenkov/systemd.go"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
-	var port = os.Getenv("PORT")
-	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./settings-app/"))))
-	http.HandleFunc("/import/myclassschedule", mcsImportHandler)
-	http.HandleFunc("/timeline", timelineHandler)
-	fmt.Println("Server started on port " + port)
-	err := http.ListenAndServe(":"+port, nil)
+	handler := http.NewServeMux()
+	handler.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./settings-app/"))))
+	handler.HandleFunc("/import/myclassschedule", mcsImportHandler)
+	handler.HandleFunc("/timeline", timelineHandler)
+	var listener net.Listener
+	var err error
+	port := os.Getenv("PORT")
+	sockets := systemd.ListenFds()
+	if sockets == nil {
+		listener, err = net.Listen("tcp", ":"+port)
+		fmt.Println("Server started on port " + port)
+	} else {
+		listener, err = net.FileListener(sockets[0])
+	}
+	if err != nil {
+		panic(err)
+	}
+	msrv := manners.NewWithServer(&http.Server{
+		Addr:           ":" + port,
+		Handler:        handler,
+		ReadTimeout:    2 * time.Minute,
+		WriteTimeout:   2 * time.Minute,
+		MaxHeaderBytes: 1 << 20,
+	})
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		for _ = range c {
+			msrv.Close()
+		}
+	}()
+	err = msrv.Serve(listener)
 	if err != nil {
 		panic(err)
 	}
