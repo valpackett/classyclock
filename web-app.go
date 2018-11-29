@@ -21,6 +21,7 @@ import (
 	"github.com/janekolszak/go-pebble"
 	"github.com/jinzhu/now"
 	"github.com/lemenkov/systemd.go"
+	"github.com/akrylysov/algnhsa"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -29,6 +30,16 @@ func main() {
 	handler.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./settings-app/"))))
 	handler.HandleFunc("/import/myclassschedule", mcsImportHandler)
 	handler.HandleFunc("/timeline", timelineHandler)
+	if os.Getenv("AWS_LAMBDA_FUNCTION_NAME") != "" {
+		algnhsa.ListenAndServe(handler, &algnhsa.Options {
+			BinaryContentTypes: []string{"application/octet-stream", "application/x-sqlite3"},
+		})
+	} else {
+		runOnSocket(handler)
+	}
+}
+
+func runOnSocket(handler http.Handler) {
 	var listener net.Listener
 	var err error
 	port := os.Getenv("PORT")
