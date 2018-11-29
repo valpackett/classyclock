@@ -120,55 +120,6 @@
 						</p>
 					</paper-material>
 
-					<paper-material class="card settings-card" elevation="1">
-						<h2>Import from My Class Schedule for Android</h2>
-						<form id="classschedule-import-form" action="../../import/myclassschedule" method="POST" enctype="multipart/form-data">
-							<input type="file" name="database">
-							<paper-button on-tap="submitClassschedule">Import</paper-button>
-						</form>
-						<p class="little-help">
-							(This is somewhat dead. MCS doesn't even export the database correctly on current Android versions??)
-							Make sure you have Firefox and a file manager such as Cabinet or Sliding Explorer installed on your device.<br>
-							Go to My Class Schedule &rarr; Settings &rarr; Backup / Restore &rarr; Create new backup.<br>
-							Open this settings page in Firefox (because the file picker doesn't work - it's an Android bug): <a href="[[currentUrl]]">[[currentUrl]]</a><br>
-							Tap the file chooser here, select your file manager, go to your SD Card &rarr; My Class Schedule and choose the latest backup file.
-							Tap Import. Then, make a backup, reopen this settings page in the Pebble app, paste and restore.
-						</p>
-					</paper-material>
-				</div>
-
-				<template is="dom-repeat" items="[[data.schedules]]" as="day">
-					<div class="classy-page">
-						<template is="dom-if" if="[[ruzEnabled]]">
-							<paper-material class="card settings-card" elevation="1">
-								<h2>You've enabled sync</h2>
-								Any changes you make here will be overwritten by it.
-							</paper-material>
-						</template>
-						<template is="dom-repeat" items="[[day.schedule]]" as="entry">
-							<paper-material class="card" elevation="1">
-								<label class="input-label">
-									<paper-input required type="text" value="[[entry.subj]]" name="subj" on-change="fieldChange"></paper-input>
-								</label>
-								<label class="input-label">
-									<span>From</span>
-									<paper-input class="labelled-input" required type="time" value="[[entry.start]]" name="start" on-change="fieldChange"></paper-input>
-								</label>
-								<label class="input-label">
-									<span>To</span>
-									<paper-input class="labelled-input" required type="time" value="[[entry.end]]" name="end" on-change="fieldChange"></paper-input>
-								</label>
-								<div class="entry-actions">
-									<paper-icon-button icon="remove" title="Remove class" on-tap="removeEntry"></paper-icon-button>
-									<paper-icon-button icon="expand-less" title="Move up" on-tap="moveUpEntry"></paper-icon-button>
-									<paper-icon-button icon="expand-more" title="Move down" on-tap="moveDownEntry"></paper-icon-button>
-								</div>
-							</paper-material>
-						</template>
-						<paper-fab icon="add" title="Add class" elevation="1" on-tap="addEntry"></paper-fab>
-					</div>
-				</template>
-
 			</iron-pages>
 
 		</paper-header-panel>
@@ -195,8 +146,6 @@
 			selectedTab: { type: Number, value: 0 },
 			vibrateMinutes: { type: Number, value: parseInt(localStorage.getItem('vibrateMinutes') || 1) },
 			backupText: { type: String, value: '' },
-			ruzEmail: { type: String, value: localStorage.getItem('ruzEmail') || '' },
-			ruzEnabled: { type: Boolean, value: localStorage.getItem('ruzEnabled') || false },
 			timelineEnabled: { type: Boolean, value: localStorage.getItem('timelineEnabled') || false },
 			colorBg: { type: String, value: localStorage.getItem('colorBg') || '#FFAAAA' },
 			colorClock: { type: String, value: localStorage.getItem('colorClock') || '#555500' },
@@ -215,8 +164,6 @@
 			} else if ((typeof hashobj === 'object') && (hashobj !== null)) {
 				initialSchedule = hashobj.schedules
 				this.vibrateMinutes = hashobj.vibrateMinutes || this.vibrateMinutes
-				this.ruzEmail = hashobj.ruzEmail || this.ruzEmail
-				this.ruzEnabled = hashobj.ruzEnabled || this.ruzEnabled
 				this.timelineEnabled = hashobj.timelineEnabled || this.timelineEnabled
 				this.colorBg = hashobj.colorBg || this.colorBg
 				this.colorClock = hashobj.colorClock || this.colorClock
@@ -258,8 +205,6 @@
 			this.backupText = JSON.stringify({
 				schedules: this.data.schedules,
 				vibrateMinutes: this.vibrateMinutes,
-				ruzEmail: this.ruzEmail,
-				ruzEnabled: this.ruzEnabled,
 				timelineEnabled: this.timelineEnabled,
 				colorBg: this.colorBg,
 				colorClock: this.colorClock,
@@ -278,8 +223,6 @@
 			var o = JSON.parse(this.backupText)
 			this.data.set('schedules', o.schedules)
 			this.set('vibrateMinutes', o.vibrateMinutes)
-			this.set('ruzEmail', o.ruzEmail)
-			this.set('ruzEnabled', o.ruzEnabled)
 			this.set('timelineEnabled', o.timelineEnabled)
 			this.set('colorBg', o.colorBg)
 			this.set('colorClock', o.colorClock)
