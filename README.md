@@ -2,20 +2,9 @@
 
 A Pebble watchface that displays when your current class ends / your next class begins.
 
-![Banner](https://www.filepicker.io/api/file/YIKNrynzSxyiX2rxpULZ)
+![Banner](https://raw.githubusercontent.com/myfreeweb/classyclock/master/graphics/banner.png)
 
-[![Available on the Pebble App Store](http://pblweb.com/badge/52fd08542ace7afe350001de/orange/medium)](https://apps.getpebble.com/applications/52fd08542ace7afe350001de)
-
-You can import your schedule from [My Class Schedule for Android](http://www.my-class-schedule.com/) in Settings.
-
-## Contributing
-
-Please feel free to submit pull requests!
-Bugfixes and simple non-breaking improvements will be accepted without any questions :-)
-
-By participating in this project you agree to follow the [Contributor Code of Conduct](http://contributor-covenant.org/version/1/2/0/).
-
-[The list of contributors is available on GitHub](https://codeberg.org/valpackett/classyclock/graphs/contributors).
+[Available on the Rebble Store](https://apps.rebble.io/en_US/application/52fd08542ace7afe350001de)
 
 ## License
 

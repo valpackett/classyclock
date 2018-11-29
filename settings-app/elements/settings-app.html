@@ -127,23 +127,12 @@
 							<paper-button on-tap="submitClassschedule">Import</paper-button>
 						</form>
 						<p class="little-help">
+							(This is somewhat dead. MCS doesn't even export the database correctly on current Android versions??)
 							Make sure you have Firefox and a file manager such as Cabinet or Sliding Explorer installed on your device.<br>
 							Go to My Class Schedule &rarr; Settings &rarr; Backup / Restore &rarr; Create new backup.<br>
 							Open this settings page in Firefox (because the file picker doesn't work - it's an Android bug): <a href="[[currentUrl]]">[[currentUrl]]</a><br>
 							Tap the file chooser here, select your file manager, go to your SD Card &rarr; My Class Schedule and choose the latest backup file.
 							Tap Import. Then, make a backup, reopen this settings page in the Pebble app, paste and restore.
-						</p>
-					</paper-material>
-
-					<paper-material class="card settings-card" elevation="1">
-						<h2>Sync from ruz.hse.ru</h2>
-						<label class="input-label">
-							edu email:
-							<paper-input type="email" name="email" value="{{ruzEmail}}"></paper-input>
-						</label>
-						<paper-toggle-button checked="{{ruzEnabled}}">Enable sync</paper-toggle-button>
-						<p class="little-help">
-							Just enable it and save the settings. The schedule will be automatically updated every day.
 						</p>
 					</paper-material>
 				</div>
